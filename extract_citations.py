@@ -184,15 +184,9 @@ def extract_citations_from_runs(runs: list) -> list:
             # Left vs Right position rule for chemical/isotope detection:
             # If superscript is on the LEFT side of text (immediately followed by 1-2
             # letter element symbol like "Xe", "He", "F"), it's isotope notation -> skip
-            # Pattern: superscript followed by 1-2 letters then space/punctuation/end
-            if next_text:
-                # Check for element-like pattern: 1-2 letters followed by space, punctuation, or end
-                # Must be a SHORT word (element symbol), not start of a longer word like "Götschke"
-                element_match = re.match(r'^([A-Z][a-z]?)(?:\s|[,.\-;:)]|$)', next_text)
-                if element_match:
-                    # This looks like isotope notation (e.g., 129Xe, 3He, 19F)
-                    i = j
-                    continue
+            if is_isotope_notation(combined_sup, next_text):
+                i = j
+                continue
 
             # Only include if we've seen regular text before this (right-side rule)
             if has_seen_regular_text:
@@ -202,6 +196,45 @@ def extract_citations_from_runs(runs: list) -> list:
             i = j
 
     return citations
+
+
+def is_isotope_notation(superscript: str, next_text: str) -> bool:
+    """
+    Pure function. Check if superscript followed by next_text looks like isotope notation.
+
+    Isotopes have superscript numbers on the LEFT of short element symbols (1-2 chars).
+    Author names are longer than 2 characters.
+
+    >>> is_isotope_notation('129', 'Xe MRI')
+    True
+    >>> is_isotope_notation('3', 'He)')
+    True
+    >>> is_isotope_notation('19', 'F MRI')
+    True
+    >>> is_isotope_notation('122', 'Götschke et al')
+    False
+    >>> is_isotope_notation('42', 'Jones et al')
+    False
+    >>> is_isotope_notation('10', 'Pavord et al')
+    False
+    >>> is_isotope_notation('42', '')
+    False
+    >>> is_isotope_notation('42', ' some text')
+    False
+    """
+    if not next_text:
+        return False
+
+    # Element symbols are 1-2 ASCII letters followed by word boundary (space, punctuation, end).
+    # Author names are longer words that may contain accented characters.
+    #
+    # Key insight: element symbols are followed by whitespace or punctuation, never by
+    # more letters (including accented ones like ö, é, etc.)
+    #
+    # We use \b for word boundary, but also explicitly check for common punctuation
+    # since \b may not work as expected with some Unicode characters.
+    match = re.match(r'^([A-Za-z]{1,2})(?:\s|[,.\-;:()]|$)', next_text)
+    return match is not None
 
 
 def is_reference_entry(text: str) -> bool:
