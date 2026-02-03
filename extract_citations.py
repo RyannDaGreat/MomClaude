@@ -74,38 +74,22 @@ def is_roman_numeral(s):
 
 def parse_citation(text):
     """
-    Parse a superscript text into citation(s).
+    Parse superscript text into a citation string.
 
-    Returns list of citation strings, or empty list if not a valid citation.
-    Handles single citations, ranges, and comma-separated lists.
-    Comma-separated groups are kept together (e.g., "19-22,42" -> "Citations 19-22, 42").
+    Returns list with one citation string, or empty list if invalid.
+    Input like "19-22,42" -> ["Citations 19-22, 42"]
+    Input like "42" -> ["Citation 42"]
     """
     text = text.strip()
-
-    # Split by comma to validate each part
     parts = [p.strip() for p in text.split(',') if p.strip()]
+    valid = [p for p in parts if CITATION_SINGLE.match(p) or CITATION_RANGE.match(p)]
 
-    if not parts:
+    if not valid:
         return []
 
-    # Validate each part is either a single number or a range
-    valid_parts = []
-    for part in parts:
-        if CITATION_RANGE.match(part) or CITATION_SINGLE.match(part):
-            valid_parts.append(part)
-
-    if not valid_parts:
-        return []
-
-    # If multiple parts, combine them with commas under "Citations"
-    # If single part that's a range, use "Citations"
-    # If single part that's a single number, use "Citation"
-    if len(valid_parts) > 1:
-        return [f"Citations {', '.join(valid_parts)}"]
-    elif CITATION_RANGE.match(valid_parts[0]):
-        return [f"Citations {valid_parts[0]}"]
-    else:
-        return [f"Citation {valid_parts[0]}"]
+    combined = ', '.join(valid)
+    plural = len(valid) > 1 or '-' in combined
+    return [f"Citation{'s' if plural else ''} {combined}"]
 
 
 def extract_citations_from_runs(runs):
