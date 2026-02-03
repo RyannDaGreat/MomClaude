@@ -152,7 +152,7 @@ def extract_citations_from_runs(runs: list) -> list:
     ['Citations 1, 2']
     >>> extract_citations_from_runs([('129', True), ('Xe', False)])
     []
-    >>> extract_citations_from_runs([('Study by Smith', False), ('10', True), ('Jones', False), ('11', True)])
+    >>> extract_citations_from_runs([('Study by Smith', False), ('10', True), (' Jones', False), ('11', True)])
     ['Citation 10', 'Citation 11']
     >>> extract_citations_from_runs([('a', True), ('Text', False)])
     []
@@ -181,10 +181,9 @@ def extract_citations_from_runs(runs: list) -> list:
             if j < len(runs):
                 next_text = runs[j][0]
 
-            # Left vs Right position rule for chemical/isotope detection:
-            # If superscript is on the LEFT side of text (immediately followed by 1-2
-            # letter element symbol like "Xe", "He", "F"), it's isotope notation -> skip
-            if is_isotope_notation(combined_sup, next_text):
+            # Left vs Right position rule:
+            # If superscript is on the LEFT side of text (followed by short word), skip it
+            if is_left_side_superscript(next_text):
                 i = j
                 continue
 
@@ -198,43 +197,55 @@ def extract_citations_from_runs(runs: list) -> list:
     return citations
 
 
-def is_isotope_notation(superscript: str, next_text: str) -> bool:
+def is_left_side_superscript(next_text: str) -> bool:
     """
-    Pure function. Check if superscript followed by next_text looks like isotope notation.
+    Pure function. Check if superscript is on the LEFT side of text (not a citation).
 
-    Isotopes have superscript numbers on the LEFT of short element symbols (1-2 chars).
-    Author names are longer than 2 characters.
+    Isotope notation (129Xe, 3He, 19F) has superscript numbers directly attached to
+    short element symbols (1-2 letters). Citations are followed by space, punctuation,
+    end of text, or longer words (author names like "Pavord").
 
-    >>> is_isotope_notation('129', 'Xe MRI')
+    Rule: If next_text starts with 1-2 letters followed by non-letter (space, punct,
+    or end), treat as left-side (isotope). Otherwise it's a citation.
+
+    >>> is_left_side_superscript('Xe MRI')
     True
-    >>> is_isotope_notation('3', 'He)')
+    >>> is_left_side_superscript('He)')
     True
-    >>> is_isotope_notation('19', 'F MRI')
+    >>> is_left_side_superscript('F MRI')
     True
-    >>> is_isotope_notation('122', 'Götschke et al')
+    >>> is_left_side_superscript('x')
+    True
+    >>> is_left_side_superscript('')
     False
-    >>> is_isotope_notation('42', 'Jones et al')
+    >>> is_left_side_superscript(' some text')
     False
-    >>> is_isotope_notation('10', 'Pavord et al')
+    >>> is_left_side_superscript(', more text')
     False
-    >>> is_isotope_notation('42', '')
+    >>> is_left_side_superscript('Pavord et al')
     False
-    >>> is_isotope_notation('42', ' some text')
+    >>> is_left_side_superscript('Jones et al')
+    False
+    >>> is_left_side_superscript('Götschke et al')
     False
     """
     if not next_text:
         return False
 
-    # Element symbols are 1-2 ASCII letters followed by word boundary (space, punctuation, end).
-    # Author names are longer words that may contain accented characters.
-    #
-    # Key insight: element symbols are followed by whitespace or punctuation, never by
-    # more letters (including accented ones like ö, é, etc.)
-    #
-    # We use \b for word boundary, but also explicitly check for common punctuation
-    # since \b may not work as expected with some Unicode characters.
-    match = re.match(r'^([A-Za-z]{1,2})(?:\s|[,.\-;:()]|$)', next_text)
-    return match is not None
+    # Check if starts with a letter
+    if not next_text[0].isalpha():
+        return False
+
+    # Find the first word (consecutive letters)
+    first_word = ''
+    for c in next_text:
+        if c.isalpha():
+            first_word += c
+        else:
+            break
+
+    # If first word is 1-2 letters, treat as isotope notation (left side)
+    return len(first_word) <= 2
 
 
 def is_reference_entry(text: str) -> bool:
