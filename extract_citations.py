@@ -67,6 +67,7 @@ from xml.etree import ElementTree as ET
 import re
 from pathlib import Path
 from functools import lru_cache
+from difflib import SequenceMatcher
 
 
 @lru_cache(maxsize=4)
@@ -96,6 +97,158 @@ REF_ENTRY_PATTERN = re.compile(r'^\d+\.\s+')                         # Reference
 
 # === CONSTANTS ===
 ROMAN_TO_INT = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10}
+DUPLICATE_THRESHOLD = 0.90  # Similarity threshold for duplicate detection
+
+
+def detect_duplicate_references(references: dict, threshold: float = DUPLICATE_THRESHOLD) -> dict:
+    """
+    Pure function. Detect duplicate references by text similarity.
+
+    Takes dict of {citation_number: reference_text} and returns dict mapping
+    duplicate citation numbers to the original (lower) citation number they
+    should be merged into.
+
+    Uses SequenceMatcher ratio - pairs with similarity >= threshold are duplicates.
+
+    >>> refs = {1: "Smith J. Paper title. Journal 2020;1:1-10.",
+    ...         2: "Jones K. Different paper. Other J 2021;2:20-30.",
+    ...         3: "Smith J. Paper title. Journal 2020;1:1-10."}
+    >>> detect_duplicate_references(refs)
+    {3: 1}
+    >>> refs2 = {1: "Smith J. Paper. J 2020.", 2: "Smith J. Paper. J 2020.", 3: "Smith J. Paper. J 2020."}
+    >>> detect_duplicate_references(refs2)
+    {2: 1, 3: 1}
+    >>> refs3 = {1: "Completely different", 2: "Nothing alike"}
+    >>> detect_duplicate_references(refs3)
+    {}
+    >>> detect_duplicate_references({})
+    {}
+    """
+    duplicates = {}
+    nums = sorted(references.keys())
+
+    for i, n1 in enumerate(nums):
+        # Skip if n1 is already marked as a duplicate
+        if n1 in duplicates:
+            continue
+
+        for n2 in nums[i+1:]:
+            # Skip if n2 is already marked as a duplicate
+            if n2 in duplicates:
+                continue
+
+            ratio = SequenceMatcher(None, references[n1], references[n2]).ratio()
+            if ratio >= threshold:
+                # n2 is duplicate of n1 (n1 is lower, so it's the original)
+                duplicates[n2] = n1
+
+    return duplicates
+
+
+def extract_numbers_from_citation(cite_str: str) -> list:
+    """
+    Pure function. Extract individual citation numbers from a citation string.
+
+    Handles single citations, ranges, and comma-separated lists.
+    Returns list of ints in order of appearance.
+
+    >>> extract_numbers_from_citation('Citation 42')
+    [42]
+    >>> extract_numbers_from_citation('Citations 1, 2')
+    [1, 2]
+    >>> extract_numbers_from_citation('Citations 19-22')
+    [19, 20, 21, 22]
+    >>> extract_numbers_from_citation('Citations 19-22, 42')
+    [19, 20, 21, 22, 42]
+    >>> extract_numbers_from_citation('Table I')
+    []
+    >>> extract_numbers_from_citation('Citations 1, 2, 3')
+    [1, 2, 3]
+    """
+    if cite_str.startswith('Table'):
+        return []
+
+    numbers = []
+    # Remove "Citation" or "Citations" prefix
+    text = re.sub(r'^Citations?\s+', '', cite_str)
+
+    # Split by comma
+    parts = [p.strip() for p in text.split(',')]
+
+    for part in parts:
+        range_match = re.match(r'^(\d+)-(\d+)$', part)
+        if range_match:
+            start, end = int(range_match.group(1)), int(range_match.group(2))
+            numbers.extend(range(start, end + 1))
+        elif re.match(r'^\d+$', part):
+            numbers.append(int(part))
+
+    return numbers
+
+
+def build_canonical_order(table_citations: dict, paragraph_results: list) -> list:
+    """
+    Pure function. Build canonical citation order by walking through paragraphs.
+
+    When a Table reference is encountered, its citations are expanded inline.
+    Returns list of citation numbers in order of first appearance.
+
+    >>> tables = {'I': ['Citation 9', 'Citation 10']}
+    >>> paras = [('First para', 'text', ['Citation 1', 'Table I', 'Citation 2'])]
+    >>> build_canonical_order(tables, paras)
+    [1, 9, 10, 2]
+    >>> tables2 = {}
+    >>> paras2 = [('P1', 't', ['Citation 5', 'Citation 3']), ('P2', 't', ['Citation 3', 'Citation 7'])]
+    >>> build_canonical_order(tables2, paras2)
+    [5, 3, 7]
+    >>> build_canonical_order({}, [])
+    []
+    """
+    seen = set()
+    order = []
+
+    for first_three, full_text, citations in paragraph_results:
+        for cite in citations:
+            if cite.startswith('Table'):
+                # Extract roman numeral and expand table citations
+                match = re.match(r'Table\s+([IVXLCDMivxlcdm]+)', cite)
+                if match:
+                    roman = match.group(1).upper()
+                    if roman in table_citations:
+                        for table_cite in table_citations[roman]:
+                            for num in extract_numbers_from_citation(table_cite):
+                                if num not in seen:
+                                    seen.add(num)
+                                    order.append(num)
+            else:
+                for num in extract_numbers_from_citation(cite):
+                    if num not in seen:
+                        seen.add(num)
+                        order.append(num)
+
+    return order
+
+
+def build_conversion_table(canonical_order: list) -> dict:
+    """
+    Pure function. Build conversion table from current to canonical numbers.
+
+    Returns dict mapping old_number -> new_number, only for numbers that change.
+
+    >>> build_conversion_table([1, 2, 3])
+    {}
+    >>> build_conversion_table([5, 3, 7])
+    {5: 1, 3: 2, 7: 3}
+    >>> build_conversion_table([1, 9, 10, 2])
+    {9: 2, 10: 3, 2: 4}
+    >>> build_conversion_table([])
+    {}
+    """
+    conversion = {}
+    for new_num, old_num in enumerate(canonical_order, 1):
+        if old_num != new_num:
+            conversion[old_num] = new_num
+    return conversion
 
 
 def extract_author_names(doc_xml: str) -> set:
@@ -606,8 +759,8 @@ def generate_markdown(table_citations: dict, paragraph_results: list, output_pat
     """
     Not a pure function. Writes to file.
 
-    Generate markdown output file with both sections.
-    Returns tuple of (int, int): (table_count, paragraph_count).
+    Generate markdown output file with three sections.
+    Returns tuple of (int, int, int): (table_count, paragraph_count, conversion_count).
     """
     lines = []
 
@@ -625,20 +778,53 @@ def generate_markdown(table_citations: dict, paragraph_results: list, output_pat
 
         lines.append("")
 
-    # Section 2: Citation Extraction by Paragraph
+    # Section 2: Citation Extraction by Paragraph (with Table expansion)
     lines.append("# Section 2: Citation Extraction by Paragraph\n")
 
+    cite_counter = 0
     for i, (first_three, full_text, citations) in enumerate(paragraph_results, 1):
         lines.append(f"## {i}. {first_three}...")
         lines.append("")
 
-        for j, cite in enumerate(citations, 1):
-            lines.append(f"- {j}. {cite}")
+        j = 0
+        for cite in citations:
+            j += 1
+            if cite.startswith('Table'):
+                # Expand table reference with sub-bullets
+                lines.append(f"- {j}. {cite}")
+                match = re.match(r'Table\s+([IVXLCDMivxlcdm]+)', cite)
+                if match:
+                    roman = match.group(1).upper()
+                    if roman in table_citations:
+                        for k, table_cite in enumerate(table_citations[roman], 1):
+                            cite_counter += 1
+                            lines.append(f"  - {j}.{k}. {table_cite}")
+            else:
+                cite_counter += 1
+                lines.append(f"- {j}. {cite}")
 
         lines.append("")
 
+    # Section 3: Citation Conversion Table
+    canonical_order = build_canonical_order(table_citations, paragraph_results)
+    conversion = build_conversion_table(canonical_order)
+
+    lines.append("# Section 3: Citation Conversion Table\n")
+
+    if conversion:
+        lines.append("| From | To |")
+        lines.append("|------|-----|")
+
+        for old_num in sorted(conversion.keys()):
+            new_num = conversion[old_num]
+            lines.append(f"| {old_num} | {new_num} |")
+    else:
+        lines.append("No conversions needed - all citations are already in canonical order.")
+
+    lines.append("")
+
     Path(output_path).write_text('\n'.join(lines))
-    return len(sorted_tables), len(paragraph_results)
+    return len(sorted_tables), len(paragraph_results), len(conversion)
 
 
 def main():
@@ -654,9 +840,10 @@ def main():
     table_citations = process_tables(xml_str, author_names)
     paragraph_results = process_paragraphs(xml_str, author_names)
 
-    table_count, para_count = generate_markdown(table_citations, paragraph_results, str(output_path))
+    table_count, para_count, conv_count = generate_markdown(table_citations, paragraph_results, str(output_path))
     print(f"Extracted {table_count} tables with citations")
     print(f"Extracted {para_count} paragraphs with citations")
+    print(f"Citations needing renumbering: {conv_count}")
     print(f"Output written to: {output_path}")
 
 

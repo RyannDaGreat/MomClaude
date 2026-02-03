@@ -83,6 +83,25 @@
 
 - 1. Citation 8
 - 2. Table I
+  - 2.1. Citation 9
+  - 2.2. Citation 10
+  - 2.3. Citation 11
+  - 2.4. Citation 12
+  - 2.5. Citation 13
+  - 2.6. Citation 14
+  - 2.7. Citation 15
+  - 2.8. Citation 16
+  - 2.9. Citation 17
+  - 2.10. Citation 18
+  - 2.11. Citation 19
+  - 2.12. Citation 20
+  - 2.13. Citation 21
+  - 2.14. Citation 22
+  - 2.15. Citation 17
+  - 2.16. Citation 23
+  - 2.17. Citation 24
+  - 2.18. Citation 25
+  - 2.19. Citation 26
 
 ## 4. Bronchoalveolar lavage and...
 
@@ -95,12 +114,50 @@
 - 2. Citation 7
 - 3. Citations 32, 33
 - 4. Table I
+  - 4.1. Citation 9
+  - 4.2. Citation 10
+  - 4.3. Citation 11
+  - 4.4. Citation 12
+  - 4.5. Citation 13
+  - 4.6. Citation 14
+  - 4.7. Citation 15
+  - 4.8. Citation 16
+  - 4.9. Citation 17
+  - 4.10. Citation 18
+  - 4.11. Citation 19
+  - 4.12. Citation 20
+  - 4.13. Citation 21
+  - 4.14. Citation 22
+  - 4.15. Citation 17
+  - 4.16. Citation 23
+  - 4.17. Citation 24
+  - 4.18. Citation 25
+  - 4.19. Citation 26
 
 ## 6. Blood eosinophils are...
 
 - 1. Citations 34, 35
 - 2. Citations 36, 37
 - 3. Table I
+  - 3.1. Citation 9
+  - 3.2. Citation 10
+  - 3.3. Citation 11
+  - 3.4. Citation 12
+  - 3.5. Citation 13
+  - 3.6. Citation 14
+  - 3.7. Citation 15
+  - 3.8. Citation 16
+  - 3.9. Citation 17
+  - 3.10. Citation 18
+  - 3.11. Citation 19
+  - 3.12. Citation 20
+  - 3.13. Citation 21
+  - 3.14. Citation 22
+  - 3.15. Citation 17
+  - 3.16. Citation 23
+  - 3.17. Citation 24
+  - 3.18. Citation 25
+  - 3.19. Citation 26
 
 ## 7. Given the invasiveness...
 
@@ -148,6 +205,25 @@
 - 6. Citation 53
 - 7. Citation 54
 - 8. Table I
+  - 8.1. Citation 9
+  - 8.2. Citation 10
+  - 8.3. Citation 11
+  - 8.4. Citation 12
+  - 8.5. Citation 13
+  - 8.6. Citation 14
+  - 8.7. Citation 15
+  - 8.8. Citation 16
+  - 8.9. Citation 17
+  - 8.10. Citation 18
+  - 8.11. Citation 19
+  - 8.12. Citation 20
+  - 8.13. Citation 21
+  - 8.14. Citation 22
+  - 8.15. Citation 17
+  - 8.16. Citation 23
+  - 8.17. Citation 24
+  - 8.18. Citation 25
+  - 8.19. Citation 26
 
 ## 13. Eosinophilic granulomatosis with...
 
@@ -199,7 +275,7 @@
 ## 19. Despite advances in...
 
 - 1. Citation 3
-- 2. Citations 87, 88
+- 2. Citations 87, 88 
 - 3. Citation 59
 - 4. Citations 89-92
 - 5. Citation 87
@@ -207,6 +283,47 @@
 - 7. Citation 93
 - 8. Citations 75, 94
 - 9. Table II
+  - 9.1. Citation 95
+  - 9.2. Citation 96
+  - 9.3. Citation 97
+  - 9.4. Citation 98
+  - 9.5. Citation 99
+  - 9.6. Citation 100
+  - 9.7. Citation 101
+  - 9.8. Citation 102
+  - 9.9. Citation 103
+  - 9.10. Citation 104
+  - 9.11. Citation 105
+  - 9.12. Citation 106
+  - 9.13. Citation 107
+  - 9.14. Citation 108
+  - 9.15. Citation 109
+  - 9.16. Citation 110
+  - 9.17. Citation 111
+  - 9.18. Citation 112
+  - 9.19. Citation 113
+  - 9.20. Citation 114
+  - 9.21. Citation 115
+  - 9.22. Citation 116
+  - 9.23. Citation 117
+  - 9.24. Citation 118
+  - 9.25. Citation 119
+  - 9.26. Citation 120
+  - 9.27. Citation 121
+  - 9.28. Citation 122
+  - 9.29. Citation 123
+  - 9.30. Citation 124
+  - 9.31. Citation 125
+  - 9.32. Citation 126
+  - 9.33. Citation 127
+  - 9.34. Citation 127
+  - 9.35. Citation 128
+  - 9.36. Citation 129
+  - 9.37. Citation 130
+  - 9.38. Citation 131
+  - 9.39. Citation 132
+  - 9.40. Citation 133
+  - 9.41. Citation 134
 
 ## 20. Accurate assessment of...
 
@@ -298,3 +415,7 @@
 ## 33. Type 2-weighted proton...
 
 - 1. Citations 200, 201
+
+# Section 3: Citation Conversion Table
+
+No conversions needed - all citations are already in canonical order.
