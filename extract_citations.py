@@ -64,21 +64,45 @@ ROMAN_TO_INT = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, '
 
 def is_roman_numeral(s):
     """
-    Check if string is a valid Roman numeral.
+    Pure function. Check if string contains only valid Roman numeral characters.
 
-    Currently permissive - just checks if only contains valid Roman numeral chars.
-    Can be swapped for strict validation later.
+    Currently permissive - can be swapped for strict validation later.
+
+    >>> is_roman_numeral('I')
+    True
+    >>> is_roman_numeral('IV')
+    True
+    >>> is_roman_numeral('XVII')
+    True
+    >>> is_roman_numeral('')
+    False
+    >>> is_roman_numeral('ABC')
+    False
+    >>> is_roman_numeral('I2')
+    False
     """
     return bool(s) and all(c in 'IVXLCDMivxlcdm' for c in s)
 
 
 def parse_citation(text):
     """
-    Parse superscript text into a citation string.
+    Pure function. Parse superscript text into a citation string.
 
     Returns list with one citation string, or empty list if invalid.
-    Input like "19-22,42" -> ["Citations 19-22, 42"]
-    Input like "42" -> ["Citation 42"]
+    Uses "Citation" for single numbers, "Citations" for ranges or multiple.
+
+    >>> parse_citation('42')
+    ['Citation 42']
+    >>> parse_citation('19-22')
+    ['Citations 19-22']
+    >>> parse_citation('19-22,42')
+    ['Citations 19-22, 42']
+    >>> parse_citation('1,2,3')
+    ['Citations 1, 2, 3']
+    >>> parse_citation('abc')
+    []
+    >>> parse_citation('')
+    []
     """
     text = text.strip()
     parts = [p.strip() for p in text.split(',') if p.strip()]
@@ -94,12 +118,22 @@ def parse_citation(text):
 
 def extract_citations_from_runs(runs):
     """
-    Extract citations from a list of (text, is_superscript) tuples.
+    Pure function. Extract citations from a list of (text, is_superscript) tuples.
 
     Applies left vs right position rule: only include superscripts that appear
     AFTER regular text (right side), not before (left side = chemical notation).
+    Consecutive superscript runs are combined before parsing.
 
-    Returns list of citation strings in order of appearance.
+    >>> extract_citations_from_runs([('Hello.', False), ('42', True)])
+    ['Citation 42']
+    >>> extract_citations_from_runs([('Text.', False), ('1', True), (',', True), ('2', True)])
+    ['Citations 1, 2']
+    >>> extract_citations_from_runs([('129', True), ('Xe', False)])
+    []
+    >>> extract_citations_from_runs([('Study by Smith', False), ('10', True), ('Jones', False), ('11', True)])
+    ['Citation 10', 'Citation 11']
+    >>> extract_citations_from_runs([('a', True), ('Text', False)])
+    []
     """
     citations = []
     has_seen_regular_text = False
