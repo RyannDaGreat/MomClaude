@@ -66,6 +66,21 @@ import zipfile
 from xml.etree import ElementTree as ET
 import re
 from pathlib import Path
+from functools import lru_cache
+
+
+@lru_cache(maxsize=4)
+def load_docx_xml(docx_path: str) -> str:
+    """
+    Not a pure function. Load and cache document.xml from a .docx file.
+
+    Returns the raw XML string for word/document.xml.
+
+    >>> # Can't doctest file I/O, but usage is:
+    >>> # xml_str = load_docx_xml('/path/to/doc.docx')
+    """
+    with zipfile.ZipFile(docx_path) as z:
+        return z.read('word/document.xml').decode('utf-8')
 
 
 NAMESPACES = {
@@ -79,6 +94,63 @@ CITATION_SINGLE = re.compile(r'^(\d+)$')
 CITATION_RANGE = re.compile(r'^(\d+)-(\d+)$')
 
 ROMAN_TO_INT = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10}
+
+# Author name pattern: LastName followed by initials (1-3 uppercase letters) then comma/semicolon
+AUTHOR_PATTERN = re.compile(r'([A-Za-zÀ-ÿ\-\']+)\s+[A-Z]{1,3}[,;]')
+
+# Reference entry pattern: starts with number + period
+REF_ENTRY_PATTERN = re.compile(r'^\d+\.\s+')
+
+
+def extract_author_names(doc_xml: str) -> set:
+    """
+    Pure function. Extract author last names from reference entries in document XML.
+
+    Parses reference entries (lines starting with "N. ") and extracts author names
+    using the pattern "LastName Initials," format common in academic citations.
+
+    Returns set of author last names (preserving original case).
+
+    >>> xml = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body><w:p><w:r><w:t>1. Smith AB, Jones CD. Title here.</w:t></w:r></w:p></w:body>
+    ... </w:document>'''
+    >>> sorted(extract_author_names(xml))
+    ['Jones', 'Smith']
+    >>> xml2 = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body><w:p><w:r><w:t>Regular paragraph text.</w:t></w:r></w:p></w:body>
+    ... </w:document>'''
+    >>> extract_author_names(xml2)
+    set()
+    >>> xml3 = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body><w:p><w:r><w:t>1. Li X, Du Y, Ho Z. Study.</w:t></w:r></w:p></w:body>
+    ... </w:document>'''
+    >>> sorted(extract_author_names(xml3))
+    ['Du', 'Ho', 'Li']
+    """
+    root = ET.fromstring(doc_xml)
+    author_names = set()
+
+    for p in root.findall('.//w:p', NAMESPACES):
+        text = ''.join(t.text for t in p.findall('.//w:t', NAMESPACES) if t.text)
+        if not REF_ENTRY_PATTERN.match(text):
+            continue
+
+        # Remove leading number
+        text = REF_ENTRY_PATTERN.sub('', text)
+
+        # Get author section (before title - first ". " followed by capital letter)
+        parts = re.split(r'\.\s+(?=[A-Z])', text, maxsplit=1)
+        if not parts:
+            continue
+
+        author_section = parts[0]
+        names = AUTHOR_PATTERN.findall(author_section)
+
+        for name in names:
+            if name.lower() not in ('et', 'al'):
+                author_names.add(name)
+
+    return author_names
 
 
 def is_roman_numeral(s: str) -> bool:
@@ -135,7 +207,7 @@ def parse_citation(text: str) -> list:
     return [f"Citation{'s' if plural else ''} {combined}"]
 
 
-def extract_citations_from_runs(runs: list) -> list:
+def extract_citations_from_runs(runs: list, author_names: set = None) -> list:
     """
     Pure function. Extract citations from a list of (str, bool) tuples.
 
@@ -143,6 +215,9 @@ def extract_citations_from_runs(runs: list) -> list:
     only include superscripts that appear AFTER regular text (right side),
     not before (left side = chemical notation). Consecutive superscript runs
     are combined before parsing.
+
+    Optional author_names set whitelists short names that should not be treated
+    as isotope symbols (e.g., "Li", "Ho" are real author names, not elements).
 
     Returns list[str] of citation strings.
 
@@ -156,6 +231,8 @@ def extract_citations_from_runs(runs: list) -> list:
     ['Citation 10', 'Citation 11']
     >>> extract_citations_from_runs([('a', True), ('Text', False)])
     []
+    >>> extract_citations_from_runs([('Text', False), ('42', True), ('Li et al', False)], {'Li'})
+    ['Citation 42']
     """
     citations = []
     has_seen_regular_text = False
@@ -183,7 +260,7 @@ def extract_citations_from_runs(runs: list) -> list:
 
             # Left vs Right position rule:
             # If superscript is on the LEFT side of text (followed by short word), skip it
-            if is_left_side_superscript(next_text):
+            if is_left_side_superscript(next_text, author_names):
                 i = j
                 continue
 
@@ -197,7 +274,7 @@ def extract_citations_from_runs(runs: list) -> list:
     return citations
 
 
-def is_left_side_superscript(next_text: str) -> bool:
+def is_left_side_superscript(next_text: str, author_names: set = None) -> bool:
     """
     Pure function. Check if superscript is on the LEFT side of text (not a citation).
 
@@ -206,7 +283,7 @@ def is_left_side_superscript(next_text: str) -> bool:
     end of text, or longer words (author names like "Pavord").
 
     Rule: If next_text starts with 1-2 letters followed by non-letter (space, punct,
-    or end), treat as left-side (isotope). Otherwise it's a citation.
+    or end), treat as left-side (isotope) UNLESS that word is a known author name.
 
     >>> is_left_side_superscript('Xe MRI')
     True
@@ -228,6 +305,10 @@ def is_left_side_superscript(next_text: str) -> bool:
     False
     >>> is_left_side_superscript('Götschke et al')
     False
+    >>> is_left_side_superscript('Li et al', {'Li', 'Du'})
+    False
+    >>> is_left_side_superscript('Xe et al', {'Xe'})
+    False
     """
     if not next_text:
         return False
@@ -243,6 +324,10 @@ def is_left_side_superscript(next_text: str) -> bool:
             first_word += c
         else:
             break
+
+    # If it's a known author name, it's not isotope notation
+    if author_names and first_word in author_names:
+        return False
 
     # If first word is 1-2 letters, treat as isotope notation (left side)
     return len(first_word) <= 2
@@ -561,17 +646,17 @@ def generate_markdown(table_citations: dict, paragraph_results: list, output_pat
 
 
 def main():
-    docx_path = Path('/Users/ryan/CleanCode/Sandbox/RP_Dumps/MomClaude2/JAIP 6391.docx')
+    docx_path = '/Users/ryan/CleanCode/Sandbox/RP_Dumps/MomClaude2/JAIP 6391.docx'
     output_path = Path('/Users/ryan/CleanCode/Sandbox/RP_Dumps/MomClaude2/citations_by_paragraph.md')
 
     print(f"Processing: {docx_path}")
 
-    with zipfile.ZipFile(docx_path, 'r') as z:
-        with z.open('word/document.xml') as f:
-            xml_str = f.read().decode('utf-8')
+    xml_str = load_docx_xml(docx_path)
+    author_names = extract_author_names(xml_str)
+    print(f"Found {len(author_names)} author names in references")
 
-    table_citations = process_tables(xml_str)
-    paragraph_results = process_paragraphs(xml_str)
+    table_citations = process_tables(xml_str, author_names)
+    paragraph_results = process_paragraphs(xml_str, author_names)
 
     table_count, para_count = generate_markdown(table_citations, paragraph_results, str(output_path))
     print(f"Extracted {table_count} tables with citations")
