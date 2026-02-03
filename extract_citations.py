@@ -100,15 +100,92 @@ ROMAN_TO_INT = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, '
 DUPLICATE_THRESHOLD = 0.90  # Similarity threshold for duplicate detection
 
 
+def extract_references(docx_path: str) -> dict:
+    """
+    Not a pure function. Extract all references from a .docx file.
+
+    Returns dict of {citation_number: reference_text}.
+    References are identified as paragraphs starting with "N. " pattern.
+    """
+    xml_str = load_docx_xml(docx_path)
+    root = ET.fromstring(xml_str)
+
+    refs = {}
+    for p in root.findall('.//w:p', NAMESPACES):
+        text = ''.join(t.text for t in p.findall('.//w:t', NAMESPACES) if t.text)
+        match = re.match(r'^(\d+)\.\s+', text)
+        if match:
+            num = int(match.group(1))
+            content = re.sub(r'^\d+\.\s+', '', text).strip()
+            refs[num] = content
+
+    return refs
+
+
+def write_sorted_references(references: dict, output_path: str) -> None:
+    """
+    Not a pure function. Write references sorted by text to a file.
+
+    Useful for manual review - duplicates cluster together when sorted.
+    """
+    sorted_refs = sorted(references.items(), key=lambda x: x[1])
+
+    with open(output_path, 'w') as f:
+        for num, text in sorted_refs:
+            f.write(f"{num}. {text}\n\n")
+
+
+def _extract_ref_key_parts(text: str) -> tuple:
+    """
+    Pure function. Extract (first_author, year, volume) for duplicate detection.
+
+    >>> _extract_ref_key_parts("Smith J, Jones K. Title. J Name 2020;15:100-10.")
+    ('Smith J', '2020', '15')
+    >>> _extract_ref_key_parts("No year or volume here")
+    ('No year or volume here', None, None)
+    >>> _extract_ref_key_parts("Author A, et al. Paper. J 2018;79:1092-105.")
+    ('Author A', '2018', '79')
+    """
+    first_author = text.split(',')[0].strip() if ',' in text else text.split('.')[0].strip()
+    year_match = re.search(r'(19|20)\d{2}', text)
+    vol_match = re.search(r';(\d+):', text)
+    return (
+        first_author,
+        year_match.group(0) if year_match else None,
+        vol_match.group(1) if vol_match else None,
+    )
+
+
+def _resolve_duplicate_chains(duplicates: dict) -> dict:
+    """
+    Pure function. Resolve chains in duplicate mapping to point to ultimate original.
+
+    >>> _resolve_duplicate_chains({3: 2, 2: 1})
+    {3: 1, 2: 1}
+    >>> _resolve_duplicate_chains({5: 3, 3: 1, 4: 1})
+    {5: 1, 3: 1, 4: 1}
+    >>> _resolve_duplicate_chains({})
+    {}
+    """
+    resolved = {}
+    for dup, orig in duplicates.items():
+        # Follow chain to find ultimate original
+        while orig in duplicates:
+            orig = duplicates[orig]
+        resolved[dup] = orig
+    return resolved
+
+
 def detect_duplicate_references(references: dict, threshold: float = DUPLICATE_THRESHOLD) -> dict:
     """
-    Pure function. Detect duplicate references by text similarity.
+    Pure function. Detect duplicate references using text similarity.
 
-    Takes dict of {citation_number: reference_text} and returns dict mapping
-    duplicate citation numbers to the original (lower) citation number they
-    should be merged into.
+    Uses SequenceMatcher to find references with >= threshold similarity (default 90%).
+    Always uses the lower citation number as the original (preserves first index).
+    Resolves chains so all duplicates point to the ultimate original.
 
-    Uses SequenceMatcher ratio - pairs with similarity >= threshold are duplicates.
+    Returns dict mapping duplicate citation numbers to the original citation
+    number they should be merged into.
 
     >>> refs = {1: "Smith J. Paper title. Journal 2020;1:1-10.",
     ...         2: "Jones K. Different paper. Other J 2021;2:20-30.",
@@ -127,22 +204,181 @@ def detect_duplicate_references(references: dict, threshold: float = DUPLICATE_T
     duplicates = {}
     nums = sorted(references.keys())
 
+    # Pass 1: High text similarity
     for i, n1 in enumerate(nums):
-        # Skip if n1 is already marked as a duplicate
         if n1 in duplicates:
             continue
 
         for n2 in nums[i+1:]:
-            # Skip if n2 is already marked as a duplicate
             if n2 in duplicates:
                 continue
 
             ratio = SequenceMatcher(None, references[n1], references[n2]).ratio()
             if ratio >= threshold:
-                # n2 is duplicate of n1 (n1 is lower, so it's the original)
                 duplicates[n2] = n1
 
+    # Resolve chains
+    return _resolve_duplicate_chains(duplicates)
+
+
+def detect_duplicate_references_with_ai(references: dict, known_duplicates: dict = None) -> dict:
+    """
+    Not a pure function. Use Claude AI to detect remaining duplicates.
+
+    Filters out known_duplicates first, writes sorted refs to temp file,
+    calls Claude subprocess to review, parses output for duplicate pairs.
+
+    Returns dict mapping duplicate citation numbers to originals.
+    """
+    import subprocess
+    import tempfile
+    import os
+
+    if known_duplicates is None:
+        known_duplicates = {}
+
+    # Filter out known duplicates
+    remaining = {k: v for k, v in references.items() if k not in known_duplicates}
+
+    if len(remaining) < 2:
+        return {}
+
+    # Write sorted refs to temp file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        temp_path = f.name
+        sorted_refs = sorted(remaining.items(), key=lambda x: x[1])
+        for num, text in sorted_refs:
+            f.write(f"{num}. {text}\n\n")
+
+    prompt = f'''You are reviewing a bibliography for duplicate references.
+
+Read the file at {temp_path} which contains references sorted alphabetically by text.
+Because they are sorted, duplicate or near-duplicate references will appear adjacent to each other.
+
+Your task: Find any duplicate references (same paper cited twice with different numbers).
+
+Look for:
+- Identical references
+- Same paper with minor formatting differences
+- Abbreviated versions (e.g., "Author A, et al." vs full author list)
+- Same author + journal + year + volume but different page numbers (likely a typo)
+
+For each duplicate pair found, output EXACTLY in this format (one per line):
+DUPLICATE: [higher_number] = [lower_number]
+
+Example:
+DUPLICATE: 196 = 129
+
+If no duplicates found, output:
+NO_DUPLICATES_FOUND
+
+Only output DUPLICATE lines or NO_DUPLICATES_FOUND. No other text.'''
+
+    try:
+        result = subprocess.run(
+            ['claude', '--dangerously-skip-permissions', '-p', prompt],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        output = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        os.unlink(temp_path)
+        raise RuntimeError(f"Claude subprocess failed: {e}")
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+    # Parse output for DUPLICATE lines
+    duplicates = {}
+    for line in output.split('\n'):
+        line = line.strip()
+        match = re.match(r'DUPLICATE:\s*(\d+)\s*=\s*(\d+)', line)
+        if match:
+            higher = int(match.group(1))
+            lower = int(match.group(2))
+            if higher > lower:
+                duplicates[higher] = lower
+            else:
+                duplicates[lower] = higher
+
     return duplicates
+
+
+def generate_numerical_conversion_table(duplicates: dict) -> str:
+    """
+    Pure function. Generate markdown table showing numerical conversion.
+
+    Maps old citation numbers to new numbers after duplicate removal.
+    Duplicates map to their original; non-duplicates get renumbered to fill gaps.
+
+    >>> generate_numerical_conversion_table({3: 1, 5: 2})[:50]
+    '| Old # | New # |\\n|-------|-------|\\n| 1 | 1 |\\n| 2 '
+    >>> generate_numerical_conversion_table({})
+    '| Old # | New # |\\n|-------|-------|\\n'
+    >>> '3 | → 1' in generate_numerical_conversion_table({3: 1})
+    True
+    """
+    if not duplicates:
+        return "| Old # | New # |\n|-------|-------|\n"
+
+    # Find all original numbers
+    all_originals = set(duplicates.values())
+    all_duplicates = set(duplicates.keys())
+    max_num = max(max(all_duplicates), max(all_originals))
+
+    # Build mapping: kept numbers get renumbered sequentially
+    kept = sorted([n for n in range(1, max_num + 1) if n not in all_duplicates])
+    old_to_new = {old: new for new, old in enumerate(kept, 1)}
+
+    lines = ["| Old # | New # |", "|-------|-------|"]
+    for old in range(1, max_num + 1):
+        if old in all_duplicates:
+            # Duplicate - show arrow to original
+            orig = duplicates[old]
+            new = old_to_new.get(orig, '?')
+            lines.append(f"| {old} | → {new} (was {orig}) |")
+        else:
+            new = old_to_new.get(old, '?')
+            lines.append(f"| {old} | {new} |")
+
+    return '\n'.join(lines)
+
+
+def generate_duplicate_comparison_table(references: dict, duplicates: dict) -> str:
+    """
+    Pure function. Generate markdown table showing kept vs deleted references.
+
+    Sorted alphabetically by reference text to show duplicates adjacent.
+    Uses markdown styling: **bold** for kept, ~~strikethrough~~ for deleted.
+
+    >>> refs = {1: "Alpha paper", 2: "Beta paper", 3: "Alpha paper"}
+    >>> table = generate_duplicate_comparison_table(refs, {3: 1})
+    >>> '**1**' in table  # Kept
+    True
+    >>> '~~3~~' in table  # Deleted
+    True
+    >>> 'Alpha paper' in table
+    True
+    """
+    sorted_refs = sorted(references.items(), key=lambda x: x[1])
+
+    lines = ["| Status | # | Reference Text |", "|--------|---|----------------|"]
+
+    for num, text in sorted_refs:
+        if num in duplicates:
+            # This is a duplicate (will be deleted)
+            orig = duplicates[num]
+            lines.append(f"| ~~DELETED~~ | ~~{num}~~ | ~~{text[:80]}{'...' if len(text) > 80 else ''}~~ (→ {orig}) |")
+        else:
+            # Check if this is an original that has duplicates pointing to it
+            has_dups = num in duplicates.values()
+            if has_dups:
+                lines.append(f"| **KEPT** | **{num}** | **{text[:80]}{'...' if len(text) > 80 else ''}** |")
+            else:
+                lines.append(f"| - | {num} | {text[:80]}{'...' if len(text) > 80 else ''} |")
+
+    return '\n'.join(lines)
 
 
 def extract_numbers_from_citation(cite_str: str) -> list:
