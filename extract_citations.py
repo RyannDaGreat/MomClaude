@@ -95,8 +95,8 @@ CITATION_RANGE = re.compile(r'^(\d+)-(\d+)$')
 
 ROMAN_TO_INT = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10}
 
-# Author name pattern: LastName followed by initials (1-3 uppercase letters) then comma/semicolon
-AUTHOR_PATTERN = re.compile(r'([A-Za-zÀ-ÿ\-\']+)\s+[A-Z]{1,3}[,;]')
+# Author name pattern: LastName followed by initials (1-3 uppercase letters) then comma/semicolon/period/end
+AUTHOR_PATTERN = re.compile(r'([A-Za-zÀ-ÿ\-\']+)\s+[A-Z]{1,3}(?:[,;.]|$)')
 
 # Reference entry pattern: starts with number + period
 REF_ENTRY_PATTERN = re.compile(r'^\d+\.\s+')
@@ -396,7 +396,7 @@ def xml_to_runs(xml_str: str) -> list:
     return runs
 
 
-def extract_table_citations(xml_str: str) -> list:
+def extract_table_citations(xml_str: str, author_names: set = None) -> list:
     """
     Pure function. Extract citations from table XML string.
 
@@ -431,13 +431,13 @@ def extract_table_citations(xml_str: str) -> list:
         for cell in cells:
             cell_xml = ET.tostring(cell, encoding='unicode')
             runs = xml_to_runs(cell_xml)
-            cell_citations = extract_citations_from_runs(runs)
+            cell_citations = extract_citations_from_runs(runs, author_names)
             citations.extend(cell_citations)
 
     return citations
 
 
-def extract_paragraph_with_citations(xml_str: str) -> tuple:
+def extract_paragraph_with_citations(xml_str: str, author_names: set = None) -> tuple:
     """
     Pure function. Extract text and citations from paragraph XML string.
 
@@ -467,7 +467,7 @@ def extract_paragraph_with_citations(xml_str: str) -> tuple:
     full_text = ''.join(text_parts)
 
     # Extract citations using left/right position rule
-    citations = extract_citations_from_runs(runs)
+    citations = extract_citations_from_runs(runs, author_names)
 
     # Also extract Table references from the text
     for match in ROMAN_PATTERN.finditer(full_text):
@@ -478,7 +478,7 @@ def extract_paragraph_with_citations(xml_str: str) -> tuple:
     return full_text, citations
 
 
-def process_tables(xml_str: str) -> dict:
+def process_tables(xml_str: str, author_names: set = None) -> dict:
     """
     Pure function. Extract tables with their Roman numeral labels from document XML.
 
@@ -541,14 +541,14 @@ def process_tables(xml_str: str) -> dict:
     for roman, table_xmls in table_groups.items():
         all_citations = []
         for tbl_xml in table_xmls:
-            citations = extract_table_citations(tbl_xml)
+            citations = extract_table_citations(tbl_xml, author_names)
             all_citations.extend(citations)
         result[roman] = all_citations
 
     return result
 
 
-def process_paragraphs(xml_str: str) -> list:
+def process_paragraphs(xml_str: str, author_names: set = None) -> list:
     """
     Pure function. Extract paragraphs with citations from document XML.
 
@@ -585,7 +585,7 @@ def process_paragraphs(xml_str: str) -> list:
 
     for p in root.findall('.//w:p', NAMESPACES):
         p_xml = ET.tostring(p, encoding='unicode')
-        text, citations = extract_paragraph_with_citations(p_xml)
+        text, citations = extract_paragraph_with_citations(p_xml, author_names)
         text = text.strip()
 
         if not text or len(text) < 30:
