@@ -16,6 +16,7 @@
 ## 3. Biomarkers are measurable...
 
 - 1. Citation 8
+- 2. Table I
 
 ## 4. Bronchoalveolar lavage and...
 
@@ -25,17 +26,19 @@
 
 ## 5. Blood eosinophil counts...
 
-- 1. Citation 31
-- 2. Citation 7
-- 3. Citation 32
-- 4. Citation 33
+- 1. Table I
+- 2. Citation 31
+- 3. Citation 7
+- 4. Citation 32
+- 5. Citation 33
 
 ## 6. Blood eosinophils are...
 
-- 1. Citation 34
-- 2. Citation 35
-- 3. Citation 36
-- 4. Citation 37
+- 1. Table I
+- 2. Citation 34
+- 3. Citation 35
+- 4. Citation 36
+- 5. Citation 37
 
 ## 7. Given the invasiveness...
 
@@ -75,11 +78,12 @@
 
 ## 12. Eosinophilic asthma is...
 
-- 1. Citation 17
-- 2. Citation 51
-- 3. Citation 52
-- 4. Citation 53
-- 5. Citation 54
+- 1. Table I
+- 2. Citation 17
+- 3. Citation 51
+- 4. Citation 52
+- 5. Citation 53
+- 6. Citation 54
 
 ## 13. Eosinophilic granulomatosis with...
 
@@ -144,6 +148,7 @@
 - 7. Citation 93
 - 8. Citation 75
 - 9. Citation 94
+- 10. Table II
 
 ## 20. Accurate assessment of...
 

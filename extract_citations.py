@@ -5,6 +5,8 @@ Extract paragraphs and their citations from a Word document.
 Output format:
 A markdown file with a numbered list where each paragraph is identified by
 its first three words as a header, followed by numbered citations.
+
+Includes both numeric citations (superscript) and Table references (Roman numerals).
 """
 
 import zipfile
@@ -17,16 +19,24 @@ NAMESPACES = {
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 }
 
+# Roman numeral pattern for tables
+ROMAN_PATTERN = re.compile(r'\b[Tt]ables?\s+([IVXivx]+)\b')
+
 
 def extract_paragraph_with_citations(p):
     """
-    Extract text and citation numbers from a paragraph element.
+    Extract text and citation references from a paragraph element.
 
     Returns:
-        tuple: (text_string, list_of_citation_numbers)
+        tuple: (text_string, list_of_citations_in_order)
+
+    Citations are returned in the order they appear, and can be either:
+    - Numeric citations (from superscript): "Citation 17"
+    - Table references: "Table I"
     """
-    text_parts = []
-    citations = []
+    # First pass: collect all runs with their properties
+    runs = []  # List of (text, is_superscript, char_position)
+    char_pos = 0
 
     for r in p.findall('.//w:r', NAMESPACES):
         rPr = r.find('w:rPr', NAMESPACES)
@@ -40,22 +50,59 @@ def extract_paragraph_with_citations(p):
 
         t = r.find('w:t', NAMESPACES)
         if t is not None and t.text:
-            if is_superscript:
-                # Extract numeric citations from superscript text
-                nums = re.findall(r'\d+', t.text)
-                citations.extend(nums)
-            else:
-                text_parts.append(t.text)
+            runs.append((t.text, is_superscript, char_pos))
+            char_pos += len(t.text)
+
+    # Build full text (non-superscript only for display)
+    text_parts = [text for text, is_sup, _ in runs if not is_sup]
+    full_text = ''.join(text_parts)
+
+    # Build complete text including superscripts for position tracking
+    all_text = ''.join(text for text, _, _ in runs)
+
+    # Collect citations in order of appearance
+    citations = []  # (position, citation_string)
+
+    # Extract superscript citations
+    current_pos = 0
+    for text, is_sup, char_pos in runs:
+        if is_sup:
+            nums = re.findall(r'\d+', text)
+            for num in nums:
+                citations.append((char_pos, f"Citation {num}"))
+        current_pos += len(text)
+
+    # Extract Table references from full text (non-superscript)
+    full_non_sup = ''.join(text for text, is_sup, _ in runs if not is_sup)
+
+    # We need position in the original stream, so rebuild with positions
+    non_sup_pos = 0
+    char_to_orig_pos = {}
+    for text, is_sup, orig_pos in runs:
+        if not is_sup:
+            for i, ch in enumerate(text):
+                char_to_orig_pos[non_sup_pos + i] = orig_pos + i
+            non_sup_pos += len(text)
+
+    for match in ROMAN_PATTERN.finditer(full_non_sup):
+        roman = match.group(1).upper()
+        # Get approximate position in original stream
+        match_pos = match.start()
+        orig_pos = char_to_orig_pos.get(match_pos, match_pos)
+        citations.append((orig_pos, f"Table {roman}"))
+
+    # Sort by position
+    citations.sort(key=lambda x: x[0])
 
     # Remove duplicates while preserving order
     seen = set()
     unique_citations = []
-    for c in citations:
-        if c not in seen:
-            seen.add(c)
-            unique_citations.append(c)
+    for pos, cite in citations:
+        if cite not in seen:
+            seen.add(cite)
+            unique_citations.append(cite)
 
-    return ''.join(text_parts), unique_citations
+    return full_text, unique_citations
 
 
 def process_docx(docx_path):
@@ -101,9 +148,9 @@ def generate_markdown(results, output_path):
         lines.append(f"## {i}. {first_three}...")
         lines.append("")
 
-        # Numbered list of citations
+        # Numbered list of citations (in order of appearance)
         for j, cite in enumerate(citations, 1):
-            lines.append(f"- {j}. Citation {cite}")
+            lines.append(f"- {j}. {cite}")
 
         lines.append("")
 
