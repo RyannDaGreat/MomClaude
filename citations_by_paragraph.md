@@ -23,7 +23,7 @@
 - 19. Citation 26
 
 ## Table II
- 
+
 - 1. Citation 95
 - 2. Citation 96
 - 3. Citation 97
@@ -69,16 +69,14 @@
 
 ## 1. Eosinophils are granulocytic...
 
-- 1. Citation 1
-- 2. Citation 2
-- 3. Citation 3
-- 4. Citation 4
+- 1. Citations 1, 2
+- 2. Citation 3
+- 3. Citation 4
 
 ## 2. The classic definition...
 
-- 1. Citation 5
-- 2. Citation 6
-- 3. Citation 7
+- 1. Citations 5, 6
+- 2. Citation 7
 
 ## 3. Biomarkers are measurable...
 
@@ -94,37 +92,32 @@
 
 - 1. Citation 31
 - 2. Citation 7
-- 3. Citation 32
-- 4. Citation 33
-- 5. Table I
+- 3. Citations 32, 33
+- 4. Table I
 
 ## 6. Blood eosinophils are...
 
-- 1. Citation 34
-- 2. Citation 35
-- 3. Citation 36
-- 4. Citation 37
-- 5. Table I
+- 1. Citations 34, 35
+- 2. Citations 36, 37
+- 3. Table I
 
 ## 7. Given the invasiveness...
 
 - 1. Citation 18
 - 2. Citation 18
-- 3. Citation 37
-- 4. Citation 38
-- 5. Citation 39
-- 6. Citation 37
+- 3. Citations 37, 38
+- 4. Citation 39
+- 5. Citation 37
 
 ## 8. The seminal 1958...
 
 - 1. Citation 40
 - 2. Citation 41
-- 3. Citations 19-22
-- 4. Citation 42
-- 5. Citation 43
-- 6. Citation 44
-- 7. Citation 19
-- 8. Citation 45
+- 3. Citations 19-22, 42
+- 4. Citation 43
+- 5. Citation 44
+- 6. Citation 19
+- 7. Citation 45
 
 ## 9. However, sputum induction...
 
@@ -133,15 +126,12 @@
 ## 10. Nitric oxide is...
 
 - 1. Citation 47
-- 2. Citation 47
-- 3. Citation 48
-- 4. Citation 49
-- 5. Citation 23
-- 6. Citation 50
-- 7. Citation 24
-- 8. Citation 25
-- 9. Citation 49
-- 10. Citation 23
+- 2. Citations 47, 48
+- 3. Citation 49
+- 4. Citation 23
+- 5. Citation 50
+- 6. Citations 24, 25, 49
+- 7. Citation 23
 
 ## 11. The Oxford Asthma...
 
@@ -186,80 +176,66 @@
 
 ## 16. Chronic obstructive pulmonary...
 
-- 1. Citation 72
-- 2. Citation 73
-- 3. Citation 74
-- 4. Citation 75
-- 5. Citation 76
-- 6. Citation 77
+- 1. Citations 72, 73
+- 2. Citations 74, 75
+- 3. Citation 76
+- 4. Citation 77
 
 ## 17. Hypereosinophilic syndrome is...
 
-- 1. Citation 78
-- 2. Citation 79
-- 3. Citation 80
-- 4. Citation 81
-- 5. Citation 82
+- 1. Citations 78, 79
+- 2. Citation 80
+- 3. Citation 81
+- 4. Citation 82
 
 ## 18. Chronic eosinophilic pneumonia...
 
 - 1. Citation 83
 - 2. Citation 84
 - 3. Citation 85
-- 4. Citation 14
-- 5. Citation 86
+- 4. Citations 14, 86
 
 ## 19. Despite advances in...
 
 - 1. Citation 3
-- 2. Citation 87
-- 3. Citation 88
-- 4. Citation 59
-- 5. Citations 89-92
-- 6. Citation 87
-- 7. Citation 92
-- 8. Citation 93
-- 9. Citation 75
-- 10. Citation 94
-- 11. Table II
+- 2. Citations 87, 88
+- 3. Citation 59
+- 4. Citations 89-92
+- 5. Citation 87
+- 6. Citation 92
+- 7. Citation 93
+- 8. Citations 75, 94
+- 9. Table II
 
 ## 20. Accurate assessment of...
 
-- 1. Citation 18
-- 2. Citation 135
-- 3. Citation 136
-- 4. Citation 137
-- 5. Citation 138
-- 6. Citation 138
-- 7. Citation 46
-- 8. Citation 138
+- 1. Citations 18, 135
+- 2. Citations 136, 137
+- 3. Citation 138
+- 4. Citation 138
+- 5. Citations 46, 138
 
 ## 21. In addition to...
 
-- 1. Citation 139
-- 2. Citation 140
+- 1. Citations 139, 140
+- 2. Citations 141, 142
 - 3. Citation 141
-- 4. Citation 142
-- 5. Citation 141
 
 ## 22. Mediators of eosinophil...
 
 - 1. Citation 142
-- 2. Citation 143
-- 3. Citation 144
-- 4. Citations 145-148
+- 2. Citations 143, 144
+- 3. Citations 145-148
 
 ## 23. Exhaled breath volatile...
 
 - 1. Citation 149
-- 2. Citation 150
-- 3. Citation 151
-- 4. Citation 152
-- 5. Citation 149
-- 6. Citation 153
-- 7. Citations 154-156
-- 8. Citation 157
-- 9. Citation 158
+- 2. Citations 150, 151
+- 3. Citation 152
+- 4. Citation 149
+- 5. Citation 153
+- 6. Citations 154-156
+- 7. Citations 157, 158
 
 ## 24. Airway inflammometry is...
 
@@ -270,17 +246,15 @@
 - 5. Citation 163
 - 6. Citation 164
 - 7. Citations 165-168
-- 8. Citation 90
-- 9. Citation 165
-- 10. Citation 169
-- 11. Citation 170
+- 8. Citations 90, 165
+- 9. Citation 169
+- 10. Citation 170
 
 ## 25. Sputum transcriptomics provides...
 
-- 1. Citation 171
-- 2. Citation 172
-- 3. Citation 173
-- 4. Citation 174
+- 1. Citations 171, 172
+- 2. Citation 173
+- 3. Citation 174
 
 ## 26. High-throughput proteomics, including...
 
@@ -294,9 +268,7 @@
 
 ## 28. Radiology is central...
 
-- 1. Citation 4
-- 2. Citation 179
-- 3. Citation 180
+- 1. Citations 4, 179, 180
 
 ## 29. Quantitative CT assessment...
 
@@ -304,23 +276,17 @@
 
 ## 30. Computed tomography–detected mucus...
 
-- 1. Citation 184
-- 2. Citation 185
-- 3. Citations 184-186
-- 4. Citation 143
-- 5. Citation 187
-- 6. Citation 188
+- 1. Citations 184, 185
+- 2. Citations 184-186
+- 3. Citations 143, 187
+- 4. Citation 188
 
 ## 31. Inhaled gas MRI...
 
-- 1. Citation 183
-- 2. Citation 189
-- 3. Citation 190
-- 4. Citation 191
-- 5. Citation 192
-- 6. Citation 193
-- 7. Citation 194
-- 8. Citation 195
+- 1. Citations 183, 189
+- 2. Citations 190, 191
+- 3. Citations 192, 193
+- 4. Citations 194, 195
 
 ## 32. This technique aims...
 
@@ -330,8 +296,7 @@
 
 ## 33. Type 2-weighted proton...
 
-- 1. Citation 200
-- 2. Citation 201
+- 1. Citations 200, 201
 
 ## 34. 197. Kaireit TF,...
 

@@ -78,26 +78,34 @@ def parse_citation(text):
 
     Returns list of citation strings, or empty list if not a valid citation.
     Handles single citations, ranges, and comma-separated lists.
+    Comma-separated groups are kept together (e.g., "19-22,42" -> "Citations 19-22, 42").
     """
     text = text.strip()
-    citations = []
 
-    # Split by comma to handle lists like "1,2" or "24,25,49"
+    # Split by comma to validate each part
     parts = [p.strip() for p in text.split(',') if p.strip()]
 
+    if not parts:
+        return []
+
+    # Validate each part is either a single number or a range
+    valid_parts = []
     for part in parts:
-        # Check for range pattern first (e.g., "197-199")
-        range_match = CITATION_RANGE.match(part)
-        if range_match:
-            citations.append(f"Citations {range_match.group(1)}-{range_match.group(2)}")
-            continue
+        if CITATION_RANGE.match(part) or CITATION_SINGLE.match(part):
+            valid_parts.append(part)
 
-        # Check for single number
-        single_match = CITATION_SINGLE.match(part)
-        if single_match:
-            citations.append(f"Citation {single_match.group(1)}")
+    if not valid_parts:
+        return []
 
-    return citations
+    # If multiple parts, combine them with commas under "Citations"
+    # If single part that's a range, use "Citations"
+    # If single part that's a single number, use "Citation"
+    if len(valid_parts) > 1:
+        return [f"Citations {', '.join(valid_parts)}"]
+    elif CITATION_RANGE.match(valid_parts[0]):
+        return [f"Citations {valid_parts[0]}"]
+    else:
+        return [f"Citation {valid_parts[0]}"]
 
 
 def extract_citations_from_runs(runs):
