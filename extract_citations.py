@@ -42,14 +42,24 @@ Section 2: Paragraph Citation Extraction Rules
 8. No Deduplication: If a citation appears multiple times, include it multiple
    times in order of appearance.
 
+9. Reference List Filtering: Bibliography/reference entries (lines starting with
+   a number followed by a period, e.g., "197. Kaireit TF...") are excluded from
+   paragraph extraction.
+
 === CODE CONVENTIONS ===
 
 - Pure functions should be marked with "Pure function." at the start of their
   docstring. Pure functions take simple built-in types (str, int, list, tuple,
   dict) and return deterministic output with no side effects.
 
+- Non-pure functions (those with side effects like file I/O) should be marked
+  with "Not a pure function." at the start of their docstring.
+
 - All pure functions must have at least 3 informative doctest examples in
-  >>> ... format so the function's behavior is clear without reading the code.
+  ">>> ..." format so the function's behavior is clear without reading the code.
+
+- This docstring must be kept in sync with the code. When adding new rules or
+  conventions, update this docstring to reflect those changes.
 """
 
 import zipfile
@@ -192,9 +202,31 @@ def extract_citations_from_runs(runs):
 
 def extract_table_citations(tbl):
     """
-    Extract citations from a table, reading row-first.
+    Pure function. Takes XML Element, returns list of strings.
 
+    Extract citations from a table, reading row-first.
     Returns list of citation strings in order of appearance (row by row).
+
+    >>> from xml.etree.ElementTree import fromstring
+    >>> xml = '''<w:tbl xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:tr><w:tc><w:r><w:t>Text</w:t></w:r>
+    ...   <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>42</w:t></w:r></w:tc></w:tr>
+    ... </w:tbl>'''
+    >>> extract_table_citations(fromstring(xml))
+    ['Citation 42']
+    >>> xml_empty = '''<w:tbl xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:tr><w:tc><w:r><w:t>No citations here</w:t></w:r></w:tc></w:tr>
+    ... </w:tbl>'''
+    >>> extract_table_citations(fromstring(xml_empty))
+    []
+    >>> xml_multi = '''<w:tbl xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:tr><w:tc><w:r><w:t>A</w:t></w:r>
+    ...   <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>1</w:t></w:r></w:tc>
+    ...   <w:tc><w:r><w:t>B</w:t></w:r>
+    ...   <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>2</w:t></w:r></w:tc></w:tr>
+    ... </w:tbl>'''
+    >>> extract_table_citations(fromstring(xml_multi))
+    ['Citation 1', 'Citation 2']
     """
     citations = []
     rows = tbl.findall('.//w:tr', NAMESPACES)
@@ -225,9 +257,36 @@ def extract_table_citations(tbl):
 
 def process_tables(root):
     """
-    Process document to extract tables with their Roman numeral labels.
+    Pure function. Takes XML Element, returns dict.
 
+    Process document to extract tables with their Roman numeral labels.
     Returns dict: {roman_numeral: [citations]}
+
+    >>> from xml.etree.ElementTree import fromstring
+    >>> xml = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body>
+    ...     <w:p><w:r><w:t>TABLE I. Title</w:t></w:r></w:p>
+    ...     <w:tbl><w:tr><w:tc><w:r><w:t>Data</w:t></w:r>
+    ...     <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>1</w:t></w:r></w:tc></w:tr></w:tbl>
+    ...   </w:body>
+    ... </w:document>'''
+    >>> process_tables(fromstring(xml))
+    {'I': ['Citation 1']}
+    >>> xml_empty = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body><w:p><w:r><w:t>No tables here</w:t></w:r></w:p></w:body>
+    ... </w:document>'''
+    >>> process_tables(fromstring(xml_empty))
+    {}
+    >>> xml_two = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body>
+    ...     <w:p><w:r><w:t>TABLE I.</w:t></w:r></w:p>
+    ...     <w:tbl><w:tr><w:tc><w:r><w:t>A</w:t></w:r></w:tc></w:tr></w:tbl>
+    ...     <w:p><w:r><w:t>TABLE II.</w:t></w:r></w:p>
+    ...     <w:tbl><w:tr><w:tc><w:r><w:t>B</w:t></w:r></w:tc></w:tr></w:tbl>
+    ...   </w:body>
+    ... </w:document>'''
+    >>> sorted(process_tables(fromstring(xml_two)).keys())
+    ['I', 'II']
     """
     body = root.find('.//w:body', NAMESPACES)
 
@@ -267,7 +326,29 @@ def process_tables(root):
 
 
 def extract_paragraph_with_citations(p):
-    """Extract text and citation references from a paragraph element."""
+    """
+    Pure function. Takes XML Element, returns tuple of (str, list).
+
+    Extract text and citation references from a paragraph element.
+
+    >>> from xml.etree.ElementTree import fromstring
+    >>> xml = '''<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:r><w:t>Hello world.</w:t></w:r>
+    ...   <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>42</w:t></w:r>
+    ... </w:p>'''
+    >>> extract_paragraph_with_citations(fromstring(xml))
+    ('Hello world.', ['Citation 42'])
+    >>> xml_empty = '''<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:r><w:t>No citations here.</w:t></w:r>
+    ... </w:p>'''
+    >>> extract_paragraph_with_citations(fromstring(xml_empty))
+    ('No citations here.', [])
+    >>> xml_table = '''<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:r><w:t>See Table I for details.</w:t></w:r>
+    ... </w:p>'''
+    >>> extract_paragraph_with_citations(fromstring(xml_table))
+    ('See Table I for details.', ['Table I'])
+    """
     runs = []
 
     for r in p.findall('.//w:r', NAMESPACES):
@@ -319,7 +400,37 @@ def is_reference_entry(text):
 
 
 def process_paragraphs(root):
-    """Process paragraphs and extract citations."""
+    """
+    Pure function. Takes XML Element, returns list of tuples.
+
+    Process paragraphs and extract citations. Skips short paragraphs (<30 chars),
+    paragraphs without citations, and reference list entries.
+
+    >>> from xml.etree.ElementTree import fromstring
+    >>> xml = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body>
+    ...     <w:p><w:r><w:t>This is a paragraph with enough text to pass the length filter.</w:t></w:r>
+    ...     <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>1</w:t></w:r></w:p>
+    ...   </w:body>
+    ... </w:document>'''
+    >>> result = process_paragraphs(fromstring(xml))
+    >>> len(result)
+    1
+    >>> result[0][0]
+    'This is a'
+    >>> xml_short = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body><w:p><w:r><w:t>Too short.</w:t></w:r>
+    ...   <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>1</w:t></w:r></w:p></w:body>
+    ... </w:document>'''
+    >>> process_paragraphs(fromstring(xml_short))
+    []
+    >>> xml_ref = '''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+    ...   <w:body><w:p><w:r><w:t>1. This is a reference entry that should be skipped entirely.</w:t></w:r>
+    ...   <w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>99</w:t></w:r></w:p></w:body>
+    ... </w:document>'''
+    >>> process_paragraphs(fromstring(xml_ref))
+    []
+    """
     results = []
     for p in root.findall('.//w:p', NAMESPACES):
         text, citations = extract_paragraph_with_citations(p)
@@ -344,7 +455,11 @@ def process_paragraphs(root):
 
 
 def generate_markdown(table_citations, paragraph_results, output_path):
-    """Generate markdown output file with both sections."""
+    """
+    Not a pure function. Writes to file.
+
+    Generate markdown output file with both sections.
+    """
     lines = []
 
     # Section 1: Citation Extraction by Table
