@@ -3,9 +3,13 @@
 Extract paragraphs and their citations from a Word document.
 
 Output format:
-A markdown file with two sections:
+A markdown file with sections:
 1. Citation Extraction by Table - citations in each table (row-first order)
 2. Citation Extraction by Paragraph - paragraphs with their citations
+3. Citation Conversion Table - mapping if citations need reordering
+4. Duplicate Reference Conversion - numerical old→new after dedup
+5. Duplicate Comparison - sorted view showing kept vs deleted references
+6. Document Modification Plan - XPath locations and replacement text
 
 === CITATION EXTRACTION RULES ===
 
@@ -45,6 +49,32 @@ Section 2: Paragraph Citation Extraction Rules
 9. Reference List Filtering: Bibliography/reference entries (lines starting with
    a number followed by a period, e.g., "197. Kaireit TF...") are excluded from
    paragraph extraction.
+
+=== CITATION TRANSFORMATION PIPELINE ===
+
+When densifying citations (removing duplicates and renumbering), each citation
+goes through this transformation:
+
+1. Original: The citation string as it appears in the document
+   Example: "Citations 165-168" or "Citations 100, 171"
+
+2. Parsed: Expanded to a list of individual citation numbers
+   Example: [165, 166, 167, 168] or [100, 171]
+
+3. After duplicate mapping: Replace any duplicate refs with their originals
+   Example: [100, 171] → [100, 100] (if 171 is duplicate of 100)
+
+4. Deduplicated & sorted: Remove duplicates from the list, sort ascending
+   Example: [100, 100] → [100]
+
+5. After densification mapping: Apply renumbering to fill gaps left by removed refs
+   Example: [100] → [98] (if refs 49 and 96 were removed, shifting numbers down)
+
+6. Formatted: Convert back to citation string with proper dash/comma notation
+   - Contiguous sequences use dashes: [153, 154, 155, 156] → "Citations 153-156"
+   - Non-contiguous use commas: [52, 97, 99] → "Citations 52, 97, 99"
+   - Mixed: [1, 2, 5, 6, 7] → "Citations 1, 2, 5-7"
+   - Single: [98] → "Citation 98"
 
 === CODE CONVENTIONS ===
 
@@ -122,67 +152,12 @@ def extract_references(docx_path: str) -> dict:
     return refs
 
 
-def write_sorted_references(references: dict, output_path: str) -> None:
-    """
-    Not a pure function. Write references sorted by text to a file.
-
-    Useful for manual review - duplicates cluster together when sorted.
-    """
-    sorted_refs = sorted(references.items(), key=lambda x: x[1])
-
-    with open(output_path, 'w') as f:
-        for num, text in sorted_refs:
-            f.write(f"{num}. {text}\n\n")
-
-
-def _extract_ref_key_parts(text: str) -> tuple:
-    """
-    Pure function. Extract (first_author, year, volume) for duplicate detection.
-
-    >>> _extract_ref_key_parts("Smith J, Jones K. Title. J Name 2020;15:100-10.")
-    ('Smith J', '2020', '15')
-    >>> _extract_ref_key_parts("No year or volume here")
-    ('No year or volume here', None, None)
-    >>> _extract_ref_key_parts("Author A, et al. Paper. J 2018;79:1092-105.")
-    ('Author A', '2018', '79')
-    """
-    first_author = text.split(',')[0].strip() if ',' in text else text.split('.')[0].strip()
-    year_match = re.search(r'(19|20)\d{2}', text)
-    vol_match = re.search(r';(\d+):', text)
-    return (
-        first_author,
-        year_match.group(0) if year_match else None,
-        vol_match.group(1) if vol_match else None,
-    )
-
-
-def _resolve_duplicate_chains(duplicates: dict) -> dict:
-    """
-    Pure function. Resolve chains in duplicate mapping to point to ultimate original.
-
-    >>> _resolve_duplicate_chains({3: 2, 2: 1})
-    {3: 1, 2: 1}
-    >>> _resolve_duplicate_chains({5: 3, 3: 1, 4: 1})
-    {5: 1, 3: 1, 4: 1}
-    >>> _resolve_duplicate_chains({})
-    {}
-    """
-    resolved = {}
-    for dup, orig in duplicates.items():
-        # Follow chain to find ultimate original
-        while orig in duplicates:
-            orig = duplicates[orig]
-        resolved[dup] = orig
-    return resolved
-
-
 def detect_duplicate_references(references: dict, threshold: float = DUPLICATE_THRESHOLD) -> dict:
     """
     Pure function. Detect duplicate references using text similarity.
 
     Uses SequenceMatcher to find references with >= threshold similarity (default 90%).
     Always uses the lower citation number as the original (preserves first index).
-    Resolves chains so all duplicates point to the ultimate original.
 
     Returns dict mapping duplicate citation numbers to the original citation
     number they should be merged into.
@@ -217,92 +192,309 @@ def detect_duplicate_references(references: dict, threshold: float = DUPLICATE_T
             if ratio >= threshold:
                 duplicates[n2] = n1
 
-    # Resolve chains
-    return _resolve_duplicate_chains(duplicates)
-
-
-def detect_duplicate_references_with_ai(references: dict, known_duplicates: dict = None) -> dict:
-    """
-    Not a pure function. Use Claude AI to detect remaining duplicates.
-
-    Filters out known_duplicates first, writes sorted refs to temp file,
-    calls Claude subprocess to review, parses output for duplicate pairs.
-
-    Returns dict mapping duplicate citation numbers to originals.
-    """
-    import subprocess
-    import tempfile
-    import os
-
-    if known_duplicates is None:
-        known_duplicates = {}
-
-    # Filter out known duplicates
-    remaining = {k: v for k, v in references.items() if k not in known_duplicates}
-
-    if len(remaining) < 2:
-        return {}
-
-    # Write sorted refs to temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
-        temp_path = f.name
-        sorted_refs = sorted(remaining.items(), key=lambda x: x[1])
-        for num, text in sorted_refs:
-            f.write(f"{num}. {text}\n\n")
-
-    prompt = f'''You are reviewing a bibliography for duplicate references.
-
-Read the file at {temp_path} which contains references sorted alphabetically by text.
-Because they are sorted, duplicate or near-duplicate references will appear adjacent to each other.
-
-Your task: Find any duplicate references (same paper cited twice with different numbers).
-
-Look for:
-- Identical references
-- Same paper with minor formatting differences
-- Abbreviated versions (e.g., "Author A, et al." vs full author list)
-- Same author + journal + year + volume but different page numbers (likely a typo)
-
-For each duplicate pair found, output EXACTLY in this format (one per line):
-DUPLICATE: [higher_number] = [lower_number]
-
-Example:
-DUPLICATE: 196 = 129
-
-If no duplicates found, output:
-NO_DUPLICATES_FOUND
-
-Only output DUPLICATE lines or NO_DUPLICATES_FOUND. No other text.'''
-
-    try:
-        result = subprocess.run(
-            ['claude', '--dangerously-skip-permissions', '-p', prompt],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        output = result.stdout.strip()
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-        os.unlink(temp_path)
-        raise RuntimeError(f"Claude subprocess failed: {e}")
-    finally:
-        if os.path.exists(temp_path):
-            os.unlink(temp_path)
-
-    # Parse output for DUPLICATE lines
-    duplicates = {}
-    for line in output.split('\n'):
-        line = line.strip()
-        match = re.match(r'DUPLICATE:\s*(\d+)\s*=\s*(\d+)', line)
-        if match:
-            higher = int(match.group(1))
-            lower = int(match.group(2))
-            if higher > lower:
-                duplicates[higher] = lower
-            else:
-                duplicates[lower] = higher
-
     return duplicates
+
+
+def build_densification_map(duplicates: dict, max_ref: int) -> dict:
+    """
+    Pure function. Build mapping from old ref numbers to new dense numbers.
+
+    Non-duplicate references get renumbered sequentially (1, 2, 3, ...).
+    Duplicate references map to the new number of their original.
+
+    >>> build_densification_map({3: 1}, 3)
+    {1: 1, 2: 2, 3: 1}
+    >>> build_densification_map({5: 2}, 5)
+    {1: 1, 2: 2, 3: 3, 4: 4, 5: 2}
+    >>> build_densification_map({}, 3)
+    {1: 1, 2: 2, 3: 3}
+    """
+    # First, identify kept refs (not duplicates) and their new numbers
+    kept = sorted([n for n in range(1, max_ref + 1) if n not in duplicates])
+    old_to_new = {old: new for new, old in enumerate(kept, 1)}
+
+    # Build full mapping including duplicates
+    result = {}
+    for old in range(1, max_ref + 1):
+        if old in duplicates:
+            # Duplicate maps to the new number of its original
+            orig = duplicates[old]
+            result[old] = old_to_new[orig]
+        else:
+            result[old] = old_to_new[old]
+
+    return result
+
+
+def format_numbers_to_citation(nums: list) -> str:
+    """
+    Pure function. Format a list of citation numbers to canonical string form.
+
+    Uses dashes for contiguous sequences, commas otherwise.
+    Returns "Citation X" for single, "Citations ..." for multiple.
+
+    >>> format_numbers_to_citation([42])
+    'Citation 42'
+    >>> format_numbers_to_citation([1, 2, 3])
+    'Citations 1-3'
+    >>> format_numbers_to_citation([1, 2, 5, 6, 7])
+    'Citations 1, 2, 5-7'
+    >>> format_numbers_to_citation([52, 97, 99])
+    'Citations 52, 97, 99'
+    >>> format_numbers_to_citation([1, 3, 5])
+    'Citations 1, 3, 5'
+    >>> format_numbers_to_citation([])
+    ''
+    """
+    if not nums:
+        return ''
+
+    nums = sorted(set(nums))
+
+    if len(nums) == 1:
+        return f'Citation {nums[0]}'
+
+    # Group into contiguous ranges
+    groups = []
+    start = nums[0]
+    end = nums[0]
+
+    for n in nums[1:]:
+        if n == end + 1:
+            end = n
+        else:
+            groups.append((start, end))
+            start = end = n
+    groups.append((start, end))
+
+    # Format each group
+    parts = []
+    for start, end in groups:
+        if start == end:
+            parts.append(str(start))
+        elif end == start + 1:
+            # Two consecutive numbers: use comma, not dash
+            parts.append(str(start))
+            parts.append(str(end))
+        else:
+            parts.append(f'{start}-{end}')
+
+    return 'Citations ' + ', '.join(parts)
+
+
+def apply_citation_mappings(nums: list, dup_map: dict, dense_map: dict) -> list:
+    """
+    Pure function. Apply duplicate and densification mappings to citation numbers.
+
+    1. Replace duplicates with their originals
+    2. Apply densification to get new numbers
+    3. Deduplicate and sort
+
+    >>> apply_citation_mappings([100, 171], {171: 100}, {100: 98, 171: 98})
+    [98]
+    >>> apply_citation_mappings([1, 2, 3], {}, {1: 1, 2: 2, 3: 3})
+    [1, 2, 3]
+    >>> apply_citation_mappings([165, 166, 167], {}, {165: 153, 166: 154, 167: 155})
+    [153, 154, 155]
+    """
+    # Step 1: Replace duplicates with originals
+    replaced = [dup_map.get(n, n) for n in nums]
+
+    # Step 2: Apply densification
+    densified = [dense_map.get(n, n) for n in replaced]
+
+    # Step 3: Dedupe and sort
+    return sorted(set(densified))
+
+
+def extract_citation_locations(xml_str: str, author_names: set = None) -> list:
+    """
+    Not a pure function (complex XML parsing). Extract citation locations with XPaths.
+
+    Returns list of dicts with:
+    - xpath: XPath to the run containing the citation
+    - original_text: The superscript text (e.g., "165-168")
+    - paragraph_index: Index of parent paragraph
+    - run_index: Index of run within paragraph
+    - context: Brief text before the citation for identification
+    """
+    root = ET.fromstring(xml_str)
+    locations = []
+
+    paragraphs = root.findall('.//w:p', NAMESPACES)
+
+    for p_idx, p in enumerate(paragraphs):
+        # Skip reference entries
+        full_text = ''.join(t.text for t in p.findall('.//w:t', NAMESPACES) if t.text)
+        if REF_ENTRY_PATTERN.match(full_text):
+            continue
+
+        runs = p.findall('.//w:r', NAMESPACES)
+        has_seen_text = False
+
+        r_idx = 0
+        while r_idx < len(runs):
+            r = runs[r_idx]
+
+            # Check if superscript
+            vert_align = r.find('.//w:vertAlign', NAMESPACES)
+            is_sup = vert_align is not None and vert_align.get(
+                '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val') == 'superscript'
+
+            text_elem = r.find('.//w:t', NAMESPACES)
+            text = text_elem.text if text_elem is not None and text_elem.text else ''
+
+            if not is_sup:
+                if text.strip():
+                    has_seen_text = True
+                r_idx += 1
+                continue
+
+            # Superscript found - combine consecutive superscript runs
+            combined_text = text
+            start_run_idx = r_idx
+            j = r_idx + 1
+            while j < len(runs):
+                next_r = runs[j]
+                next_vert = next_r.find('.//w:vertAlign', NAMESPACES)
+                next_is_sup = next_vert is not None and next_vert.get(
+                    '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val') == 'superscript'
+                if not next_is_sup:
+                    break
+                next_text_elem = next_r.find('.//w:t', NAMESPACES)
+                if next_text_elem is not None and next_text_elem.text:
+                    combined_text += next_text_elem.text
+                j += 1
+
+            # Check what comes after
+            next_text = ''
+            if j < len(runs):
+                next_text_elem = runs[j].find('.//w:t', NAMESPACES)
+                if next_text_elem is not None and next_text_elem.text:
+                    next_text = next_text_elem.text
+
+            # Skip left-side superscripts (isotopes)
+            if is_left_side_superscript(next_text, author_names):
+                r_idx = j
+                continue
+
+            # Skip if no regular text seen yet
+            if not has_seen_text:
+                r_idx = j
+                continue
+
+            # Validate as citation
+            combined_text = combined_text.strip()
+            if CITATION_SINGLE.match(combined_text) or CITATION_RANGE.match(combined_text):
+                # Get context (last ~30 chars before this citation)
+                context_parts = []
+                for prev_r in runs[:start_run_idx]:
+                    t = prev_r.find('.//w:t', NAMESPACES)
+                    if t is not None and t.text:
+                        context_parts.append(t.text)
+                context = ''.join(context_parts)[-30:].strip()
+
+                locations.append({
+                    'xpath': f"w:body/w:p[{p_idx + 1}]/w:r[{start_run_idx + 1}]",
+                    'original_text': combined_text,
+                    'paragraph_index': p_idx,
+                    'run_index': start_run_idx,
+                    'end_run_index': j - 1,  # Last run of this citation
+                    'context': context,
+                })
+
+            r_idx = j
+
+    return locations
+
+
+def generate_modification_plan(
+    locations: list,
+    dup_map: dict,
+    dense_map: dict,
+    references: dict,
+) -> str:
+    """
+    Pure function. Generate Section 6 markdown showing document modification plan.
+
+    For each citation location, shows original text, new text after transformation,
+    and the XPath for programmatic replacement.
+    """
+    lines = [
+        f"**Summary:**",
+        f"- Original references: {len(references)}",
+        f"- After removing duplicates: {len(references) - len(dup_map)}",
+        f"- Citation instances to update: {len(locations)}",
+        "",
+        "| Location | Context | Original | New | Change |",
+        "|----------|---------|----------|-----|--------|",
+    ]
+
+    for loc in locations:
+        orig_text = loc['original_text']
+
+        # Parse original to numbers
+        if '-' in orig_text:
+            match = CITATION_RANGE.match(orig_text)
+            if match:
+                start, end = int(match.group(1)), int(match.group(2))
+                orig_nums = list(range(start, end + 1))
+            else:
+                orig_nums = [int(orig_text)]
+        else:
+            orig_nums = [int(n.strip()) for n in orig_text.split(',') if n.strip().isdigit()]
+
+        # Apply mappings
+        new_nums = apply_citation_mappings(orig_nums, dup_map, dense_map)
+
+        # Format new citation (just the numbers part)
+        if len(new_nums) == 0:
+            new_text = "(removed)"
+            change_type = "removed"
+        elif len(new_nums) == 1:
+            new_text = str(new_nums[0])
+            if len(orig_nums) > 1:
+                change_type = "merged"
+            elif orig_nums[0] in dup_map:
+                change_type = "duplicate"
+            elif orig_nums[0] != new_nums[0]:
+                change_type = "renumbered"
+            else:
+                change_type = "unchanged"
+        else:
+            # Format with dashes for contiguous
+            new_text = format_numbers_to_citation(new_nums).replace('Citations ', '').replace('Citation ', '')
+            if set(orig_nums) != set(new_nums):
+                change_type = "renumbered"
+            else:
+                change_type = "unchanged"
+
+        context = loc['context'][-20:] if loc['context'] else ""
+        xpath = loc['xpath']
+
+        lines.append(f"| `{xpath}` | ...{context} | {orig_text} | {new_text} | {change_type} |")
+
+    # Add reference deletion plan
+    lines.append("")
+    lines.append("### Reference List Modifications")
+    lines.append("")
+    lines.append("| Action | Ref # | New # | Reference Text |")
+    lines.append("|--------|-------|-------|----------------|")
+
+    for old_num in sorted(references.keys()):
+        text = references[old_num][:60] + "..." if len(references[old_num]) > 60 else references[old_num]
+        if old_num in dup_map:
+            orig = dup_map[old_num]
+            new_num = dense_map[orig]
+            lines.append(f"| ~~DELETE~~ | ~~{old_num}~~ | → {new_num} | ~~{text}~~ |")
+        else:
+            new_num = dense_map[old_num]
+            if old_num != new_num:
+                lines.append(f"| RENUMBER | {old_num} | {new_num} | {text} |")
+            else:
+                lines.append(f"| keep | {old_num} | {new_num} | {text} |")
+
+    return '\n'.join(lines)
 
 
 def generate_numerical_conversion_table(duplicates: dict) -> str:
@@ -998,13 +1190,15 @@ def generate_markdown(
     output_path: str,
     references: dict = None,
     duplicates: dict = None,
+    xml_str: str = None,
+    author_names: set = None,
 ) -> tuple:
     """
     Not a pure function. Writes to file.
 
     Generate markdown output file with sections for tables, paragraphs, conversion,
-    and optionally duplicate reference tables.
-    Returns tuple of (int, int, int, int): (table_count, paragraph_count, conversion_count, duplicate_count).
+    duplicate reference tables, and document modification plan.
+    Returns tuple of (int, int, int, int, int): (table_count, paragraph_count, conversion_count, duplicate_count, mod_count).
     """
     lines = []
 
@@ -1088,8 +1282,132 @@ def generate_markdown(
         lines.append(generate_duplicate_comparison_table(references, duplicates))
         lines.append("")
 
+    # Section 6: Document Modification Plan (if xml_str provided)
+    mod_count = 0
+    if xml_str is not None and references is not None and duplicates is not None:
+        max_ref = max(references.keys())
+        dense_map = build_densification_map(duplicates, max_ref)
+        locations = extract_citation_locations(xml_str, author_names)
+        mod_count = len(locations)
+
+        lines.append("# Section 6: Document Modification Plan\n")
+        lines.append(generate_modification_plan(locations, duplicates, dense_map, references))
+        lines.append("")
+
     Path(output_path).write_text('\n'.join(lines))
-    return len(sorted_tables), len(paragraph_results), len(conversion), duplicate_count
+    return len(sorted_tables), len(paragraph_results), len(conversion), duplicate_count, mod_count
+
+
+def create_modified_document(
+    docx_path: str,
+    output_path: str,
+    locations: list,
+    dup_map: dict,
+    dense_map: dict,
+    references: dict,
+) -> int:
+    """
+    Not a pure function. Create a modified Word document with updated citations.
+
+    Reads the original .docx, applies citation transformations, and writes
+    a new .docx file. Returns the number of modifications made.
+    """
+    import shutil
+    import tempfile
+
+    # Copy original to temp location
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_docx = Path(temp_dir) / 'temp.docx'
+        shutil.copy(docx_path, temp_docx)
+
+        # Extract the docx (it's a zip file)
+        extract_dir = Path(temp_dir) / 'extracted'
+        with zipfile.ZipFile(temp_docx, 'r') as z:
+            z.extractall(extract_dir)
+
+        # Read and modify document.xml
+        doc_xml_path = extract_dir / 'word' / 'document.xml'
+        with open(doc_xml_path, 'r', encoding='utf-8') as f:
+            xml_content = f.read()
+
+        root = ET.fromstring(xml_content)
+
+        # Track modifications
+        mod_count = 0
+
+        # Process each citation location
+        for loc in locations:
+            p_idx = loc['paragraph_index']
+            r_start = loc['run_index']
+            r_end = loc['end_run_index']
+            orig_text = loc['original_text']
+
+            # Parse original numbers
+            if '-' in orig_text:
+                match = CITATION_RANGE.match(orig_text)
+                if match:
+                    start, end = int(match.group(1)), int(match.group(2))
+                    orig_nums = list(range(start, end + 1))
+                else:
+                    orig_nums = [int(orig_text)]
+            else:
+                orig_nums = [int(n.strip()) for n in orig_text.split(',') if n.strip().isdigit()]
+
+            # Apply mappings
+            new_nums = apply_citation_mappings(orig_nums, dup_map, dense_map)
+
+            # Format new text (just the number part)
+            if len(new_nums) == 0:
+                new_text = ""
+            elif len(new_nums) == 1:
+                new_text = str(new_nums[0])
+            else:
+                new_text = format_numbers_to_citation(new_nums).replace('Citations ', '').replace('Citation ', '')
+
+            # Skip if unchanged
+            if new_text == orig_text:
+                continue
+
+            # Find and modify the run(s)
+            paragraphs = root.findall('.//w:p', NAMESPACES)
+            if p_idx < len(paragraphs):
+                p = paragraphs[p_idx]
+                runs = p.findall('.//w:r', NAMESPACES)
+
+                # Modify the first run of the citation
+                if r_start < len(runs):
+                    r = runs[r_start]
+                    text_elem = r.find('.//w:t', NAMESPACES)
+                    if text_elem is not None:
+                        text_elem.text = new_text
+                        mod_count += 1
+
+                    # Clear subsequent runs in this citation group
+                    for r_idx in range(r_start + 1, min(r_end + 1, len(runs))):
+                        r = runs[r_idx]
+                        text_elem = r.find('.//w:t', NAMESPACES)
+                        if text_elem is not None:
+                            text_elem.text = ""
+
+        # Write modified XML back
+        # Register namespaces to avoid ns0: prefixes
+        for prefix, uri in NAMESPACES.items():
+            ET.register_namespace(prefix, uri)
+        # Also register other common Office namespaces
+        ET.register_namespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships')
+        ET.register_namespace('wp', 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing')
+
+        tree = ET.ElementTree(root)
+        tree.write(doc_xml_path, encoding='UTF-8', xml_declaration=True)
+
+        # Repack the docx
+        with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as z:
+            for file_path in extract_dir.rglob('*'):
+                if file_path.is_file():
+                    arcname = file_path.relative_to(extract_dir)
+                    z.write(file_path, arcname)
+
+    return mod_count
 
 
 def main():
@@ -1110,15 +1428,29 @@ def main():
     duplicates = detect_duplicate_references(references)
     print(f"Found {len(references)} references, {len(duplicates)} duplicates")
 
-    table_count, para_count, conv_count, dup_count = generate_markdown(
+    table_count, para_count, conv_count, dup_count, mod_count = generate_markdown(
         table_citations, paragraph_results, str(output_path),
-        references=references, duplicates=duplicates
+        references=references, duplicates=duplicates,
+        xml_str=xml_str, author_names=author_names
     )
     print(f"Extracted {table_count} tables with citations")
+    print(f"Citation locations to modify: {mod_count}")
     print(f"Extracted {para_count} paragraphs with citations")
     print(f"Citations needing renumbering: {conv_count}")
     print(f"Duplicate references: {dup_count}")
     print(f"Output written to: {output_path}")
+
+    # Create modified document
+    max_ref = max(references.keys())
+    dense_map = build_densification_map(duplicates, max_ref)
+    locations = extract_citation_locations(xml_str, author_names)
+
+    modified_docx_path = docx_path.replace('.docx', '_modified.docx')
+    actual_mods = create_modified_document(
+        docx_path, modified_docx_path, locations, duplicates, dense_map, references
+    )
+    print(f"Modified document created: {modified_docx_path}")
+    print(f"Actual modifications made: {actual_mods}")
 
 
 if __name__ == '__main__':

@@ -839,3 +839,373 @@ No conversions needed - all citations are already in canonical order.
 | **KEPT** | **112** | **Wolfe MG, Mukherjee M, Radford K, Brennan JD, Nair P. Rapid quantification of sp...** |
 | ~~DELETED~~ | ~~144~~ | ~~Wolfe MG, Mukherjee M, Radford K, Brennan JD, Nair P. Rapid quantification of sp...~~ (→ 112) |
 | - | 25 | Zitt M. Clinical applications of exhaled nitric oxide for the diagnosis and mana... |
+
+# Section 6: Document Modification Plan
+
+**Summary:**
+- Original references: 201
+- After removing duplicates: 175
+- Citation instances to update: 154
+
+| Location | Context | Original | New | Change |
+|----------|---------|----------|-----|--------|
+| `w:body/w:p[51]/w:r[13]` | ...lammatory mediators. | 3 | 3 | unchanged |
+| `w:body/w:p[51]/w:r[28]` | ...sis, and treatments. | 4 | 4 | unchanged |
+| `w:body/w:p[52]/w:r[20]` | ... a diagnosis of ELD. | 7 | 7 | unchanged |
+| `w:body/w:p[55]/w:r[2]` | ... precision medicine. | 8 | 8 | unchanged |
+| `w:body/w:p[57]/w:r[6]` | ...tissue eosinophilia. | 27 | 27 | unchanged |
+| `w:body/w:p[57]/w:r[16]` | ...thorax, and hypoxia. | 28-30 | 28-30 | unchanged |
+| `w:body/w:p[59]/w:r[16]` | ... up to 300 cells/μL. | 31 | 31 | unchanged |
+| `w:body/w:p[59]/w:r[25]` | ...across several ELDs, | 7 | 7 | unchanged |
+| `w:body/w:p[62]/w:r[5]` | ...airway inflammation. | 18 | 18 | unchanged |
+| `w:body/w:p[62]/w:r[20]` | ... medical facilities. | 18 | 18 | unchanged |
+| `w:body/w:p[62]/w:r[46]` | ...forms of the disease | 39 | 39 | unchanged |
+| `w:body/w:p[62]/w:r[52]` | ...high symptom burden, | 37 | 37 | unchanged |
+| `w:body/w:p[63]/w:r[5]` | ...tudy by Morrow Brown | 40 | 40 | unchanged |
+| `w:body/w:p[63]/w:r[13]` | ...tudies have used 3%. | 41 | 41 | unchanged |
+| `w:body/w:p[63]/w:r[30]` | ...oid dose adjustment. | 43 | 43 | unchanged |
+| `w:body/w:p[63]/w:r[45]` | ...diagnostic purposes. | 44 | 44 | unchanged |
+| `w:body/w:p[63]/w:r[51]` | ...icosteroid exposure. | 19 | 19 | unchanged |
+| `w:body/w:p[63]/w:r[67]` | ...e to severe disease. | 45 | 45 | unchanged |
+| `w:body/w:p[64]/w:r[17]` | ...sing sputum samples. | 46 | 46 | unchanged |
+| `w:body/w:p[66]/w:r[7]` | ...ly measured as FeNO. | 47 | 47 | unchanged |
+| `w:body/w:p[66]/w:r[47]` | ...ases such as asthma. | 49 | 23 | duplicate |
+| `w:body/w:p[66]/w:r[62]` | ...ticosteroid therapy. | 23 | 23 | unchanged |
+| `w:body/w:p[66]/w:r[68]` | ...nostic decisiveness. | 50 | 49 | renumbered |
+| `w:body/w:p[66]/w:r[95]` | ...-targeted biologics. | 23 | 23 | unchanged |
+| `w:body/w:p[68]/w:r[5]` | ...sthma exacerbations. | 26 | 26 | unchanged |
+| `w:body/w:p[72]/w:r[9]` | ...sinophilic phenotype | 17 | 17 | unchanged |
+| `w:body/w:p[72]/w:r[22]` | ...ence as high as 84%. | 51 | 50 | renumbered |
+| `w:body/w:p[72]/w:r[35]` | ...evere exacerbations. | 17 | 17 | unchanged |
+| `w:body/w:p[72]/w:r[50]` | ...f 300/μL or greater, | 17 | 17 | unchanged |
+| `w:body/w:p[72]/w:r[57]` | ...ion from other ELDs. | 52 | 51 | renumbered |
+| `w:body/w:p[72]/w:r[67]` | ...cs for severe asthma | 53 | 52 | renumbered |
+| `w:body/w:p[72]/w:r[120]` | ...s with nasal polyps. | 54 | 53 | renumbered |
+| `w:body/w:p[74]/w:r[11]` | ...rotizing vasculitis. | 55 | 54 | renumbered |
+| `w:body/w:p[74]/w:r[16]` | ...out sex predominance | 56 | 55 | renumbered |
+| `w:body/w:p[74]/w:r[39]` | ...und-glass opacities. | 57 | 56 | renumbered |
+| `w:body/w:p[74]/w:r[51]` | ...trapulmonary organs, | 58 | 57 | renumbered |
+| `w:body/w:p[74]/w:r[65]` | ... once every 4 weeks, | 59 | 58 | renumbered |
+| `w:body/w:p[74]/w:r[71]` | ... rates of remission. | 60 | 59 | renumbered |
+| `w:body/w:p[76]/w:r[8]` | ...ressive lung damage. | 61 | 60 | renumbered |
+| `w:body/w:p[76]/w:r[26]` | ...ely those with COPD. | 62 | 61 | renumbered |
+| `w:body/w:p[76]/w:r[32]` | ... and rhinosinusitis. | 63 | 62 | renumbered |
+| `w:body/w:p[76]/w:r[49]` | ...kin test positivity. | 64 | 63 | renumbered |
+| `w:body/w:p[76]/w:r[68]` | ...sis or eosinophilia. | 65 | 64 | renumbered |
+| `w:body/w:p[76]/w:r[75]` | ...longed itraconazole. | 66 | 65 | renumbered |
+| `w:body/w:p[76]/w:r[87]` | ... in select patients. | 67 | 66 | renumbered |
+| `w:body/w:p[78]/w:r[3]` | ...hyperresponsiveness. | 68 | 67 | renumbered |
+| `w:body/w:p[78]/w:r[9]` | ...predominant symptom. | 69 | 68 | renumbered |
+| `w:body/w:p[78]/w:r[15]` | ... is rarely required. | 70 | 69 | renumbered |
+| `w:body/w:p[78]/w:r[35]` | ... progress to asthma. | 71 | 70 | renumbered |
+| `w:body/w:p[80]/w:r[62]` | ...s were not observed. | 76 | 75 | renumbered |
+| `w:body/w:p[80]/w:r[78]` | ...y approval for COPD, | 77 | 76 | renumbered |
+| `w:body/w:p[82]/w:r[22]` | ...100,000 individuals. | 80 | 79 | renumbered |
+| `w:body/w:p[82]/w:r[28]` | ...t commonly involved. | 81 | 80 | renumbered |
+| `w:body/w:p[82]/w:r[34]` | ...heeze, and fibrosis. | 82 | 81 | renumbered |
+| `w:body/w:p[84]/w:r[11]` | ...titial lung disease. | 83 | 82 | renumbered |
+| `w:body/w:p[84]/w:r[24]` | ...female predominance. | 84 | 83 | renumbered |
+| `w:body/w:p[84]/w:r[32]` | ...low a CEP diagnosis. | 85 | 84 | renumbered |
+| `w:body/w:p[87]/w:r[9]` | ...–targeted therapies, | 3 | 3 | unchanged |
+| `w:body/w:p[87]/w:r[28]` | ...ates with remission. | 59 | 58 | renumbered |
+| `w:body/w:p[87]/w:r[45]` | ...d blood eosinophils, | 89-92 | 88-91 | renumbered |
+| `w:body/w:p[87]/w:r[57]` | ...d tissue regulation. | 87 | 86 | renumbered |
+| `w:body/w:p[87]/w:r[62]` | ...on.87 Transcriptomic | 92 | 91 | renumbered |
+| `w:body/w:p[87]/w:r[67]` | ... mechanistic studies | 93 | 92 | renumbered |
+| `w:body/w:p[89]/w:r[47]` | ...n or centrifugation. | 138 | 94 | duplicate |
+| `w:body/w:p[89]/w:r[81]` | ...hed healthy cohort). | 138 | 94 | duplicate |
+| `w:body/w:p[91]/w:r[44]` | ...repeat measurements. | 141 | 96 | duplicate |
+| `w:body/w:p[92]/w:r[15]` | ...airway eosinophilia. | 142 | 109 | duplicate |
+| `w:body/w:p[92]/w:r[59]` | ... clinical relevance. | 145-148 | 138-141 | renumbered |
+| `w:body/w:p[94]/w:r[5]` | ...for sputum cytology. | 149 | 142 | renumbered |
+| `w:body/w:p[94]/w:r[27]` | ...high accuracy (85%), | 152 | 100 | duplicate |
+| `w:body/w:p[94]/w:r[33]` | ...granulocytic asthma. | 149 | 142 | renumbered |
+| `w:body/w:p[94]/w:r[45]` | ...ristic curve, 0.90). | 153 | 101 | duplicate |
+| `w:body/w:p[94]/w:r[53]` | ...and healthy controls | 154-156 | 102, 103, 145 | renumbered |
+| `w:body/w:p[96]/w:r[36]` | ...flammasome activity. | 159 | 106 | duplicate |
+| `w:body/w:p[96]/w:r[47]` | ... the IL-33 receptor. | 160 | 148 | renumbered |
+| `w:body/w:p[96]/w:r[66]` | ...3 inflammatory axis. | 161 | 149 | renumbered |
+| `w:body/w:p[96]/w:r[71]` | ...iseases such as EGPA | 162 | 150 | renumbered |
+| `w:body/w:p[96]/w:r[77]` | ...eosinophilic asthma, | 163 | 151 | renumbered |
+| `w:body/w:p[96]/w:r[87]` | ... and T2 suppression. | 164 | 152 | renumbered |
+| `w:body/w:p[96]/w:r[99]` | ... serum-negative EGPA | 165-168 | 153-156 | renumbered |
+| `w:body/w:p[96]/w:r[130]` | ...f clinical severity. | 169 | 157 | renumbered |
+| `w:body/w:p[96]/w:r[138]` | ...metry-based approach | 170 | 158 | renumbered |
+| `w:body/w:p[100]/w:r[46]` | ...nophil counts alone. | 173 | 159 | renumbered |
+| `w:body/w:p[100]/w:r[53]` | ...rlying pathobiology. | 174 | 160 | renumbered |
+| `w:body/w:p[102]/w:r[9]` | ... sputum, and tissue. | 175 | 161 | renumbered |
+| `w:body/w:p[102]/w:r[25]` | ...ntial as biomarkers. | 176 | 117 | duplicate |
+| `w:body/w:p[104]/w:r[21]` | ...flammatory pathways. | 177 | 162 | renumbered |
+| `w:body/w:p[104]/w:r[29]` | ...lammation in asthma. | 178 | 163 | renumbered |
+| `w:body/w:p[109]/w:r[8]` | ...nction and symptoms. | 181-183 | 118, 122, 166 | renumbered |
+| `w:body/w:p[111]/w:r[18]` | ...duced lung function. | 184-186 | 120, 167, 168 | renumbered |
+| `w:body/w:p[111]/w:r[40]` | ...inophilic phenotype. | 188 | 170 | renumbered |
+| `w:body/w:p[115]/w:r[14]` | ... and cardiac cycles. | 196 | 127 | duplicate |
+| `w:body/w:p[115]/w:r[25]` | ...erpolarized gas MRI, | 197 | 128 | duplicate |
+| `w:body/w:p[115]/w:r[31]` | ...mprovements in ABPA. | 197-199 | 128, 129, 175 | renumbered |
+| `w:body/w:p[378]/w:r[2]` | ...De Giacomi et al | 9 | 9 | unchanged |
+| `w:body/w:p[389]/w:r[2]` | ...Watz et al | 10 | 10 | unchanged |
+| `w:body/w:p[391]/w:r[2]` | ...Pavord et al | 11 | 11 | unchanged |
+| `w:body/w:p[393]/w:r[2]` | ...Grayson et al | 12 | 12 | unchanged |
+| `w:body/w:p[401]/w:r[2]` | ...De Giacomi et al | 13 | 13 | unchanged |
+| `w:body/w:p[403]/w:r[2]` | ...Marchand et al | 14 | 14 | unchanged |
+| `w:body/w:p[405]/w:r[2]` | ...Allen et al | 15 | 15 | unchanged |
+| `w:body/w:p[407]/w:r[2]` | ...Bousquet et al | 16 | 16 | unchanged |
+| `w:body/w:p[409]/w:r[2]` | ...nitiative for Asthma | 17 | 17 | unchanged |
+| `w:body/w:p[417]/w:r[2]` | ...Pizzichini et al | 18 | 18 | unchanged |
+| `w:body/w:p[419]/w:r[2]` | ...Green et al | 19 | 19 | unchanged |
+| `w:body/w:p[421]/w:r[2]` | ...Siva et al | 20 | 20 | unchanged |
+| `w:body/w:p[423]/w:r[2]` | ...Leigh et al | 21 | 21 | unchanged |
+| `w:body/w:p[425]/w:r[2]` | ...Nair et al | 22 | 22 | unchanged |
+| `w:body/w:p[427]/w:r[2]` | ...nitiative for Asthma | 17 | 17 | unchanged |
+| `w:body/w:p[434]/w:r[2]` | ...Dweik et al | 23 | 23 | unchanged |
+| `w:body/w:p[436]/w:r[2]` | ...Louis et al | 24 | 24 | unchanged |
+| `w:body/w:p[438]/w:r[2]` | ...Zitt | 25 | 25 | unchanged |
+| `w:body/w:p[445]/w:r[2]` | ...Meulmeester et al | 26 | 26 | unchanged |
+| `w:body/w:p[463]/w:r[2]` | ...Patel et al | 95 | 94 | renumbered |
+| `w:body/w:p[464]/w:r[2]` | ...natti and Spanevello | 96 | 46 | duplicate |
+| `w:body/w:p[470]/w:r[2]` | ...Pizzichini et al | 97 | 95 | renumbered |
+| `w:body/w:p[471]/w:r[2]` | ...Kjarsgaard et al | 98 | 96 | renumbered |
+| `w:body/w:p[472]/w:r[2]` | ...Klein et al | 99 | 97 | renumbered |
+| `w:body/w:p[479]/w:r[2]` | ...Baines et al | 100 | 98 | renumbered |
+| `w:body/w:p[480]/w:r[2]` | ...Fricker et al | 101 | 99 | renumbered |
+| `w:body/w:p[487]/w:r[2]` | ...Ibrahim et al | 102 | 100 | renumbered |
+| `w:body/w:p[488]/w:r[2]` | ...Peltrini et al | 103 | 101 | renumbered |
+| `w:body/w:p[489]/w:r[2]` | ...Dragonieri et al | 104 | 102 | renumbered |
+| `w:body/w:p[490]/w:r[2]` | ...Fens et al | 105 | 103 | renumbered |
+| `w:body/w:p[499]/w:r[2]` | ...Kelly et al | 106 | 104 | renumbered |
+| `w:body/w:p[500]/w:r[2]` | ...Kim et al | 107 | 105 | renumbered |
+| `w:body/w:p[501]/w:r[2]` | ...Mukherjee et al | 108 | 106 | renumbered |
+| `w:body/w:p[502]/w:r[2]` | ...Hekking et al | 109 | 107 | renumbered |
+| `w:body/w:p[503]/w:r[2]` | ...Svenningsen et al | 110 | 108 | renumbered |
+| `w:body/w:p[510]/w:r[2]` | ...Nair et al | 111 | 109 | renumbered |
+| `w:body/w:p[511]/w:r[2]` | ...Wolfe et al | 112 | 110 | renumbered |
+| `w:body/w:p[512]/w:r[2]` | ...Ali et al | 113 | 111 | renumbered |
+| `w:body/w:p[519]/w:r[2]` | ...Dor et al | 114 | 112 | renumbered |
+| `w:body/w:p[520]/w:r[2]` | ...Dvorak et al | 115 | 113 | renumbered |
+| `w:body/w:p[521]/w:r[2]` | ...Persson et al | 116 | 114 | renumbered |
+| `w:body/w:p[522]/w:r[2]` | ...Nyenhuis et al | 117 | 115 | renumbered |
+| `w:body/w:p[530]/w:r[2]` | ...Hastie et al | 118 | 116 | renumbered |
+| `w:body/w:p[531]/w:r[2]` | ...Lin et al | 119 | 117 | renumbered |
+| `w:body/w:p[540]/w:r[2]` | ...Diaz et al | 120 | 118 | renumbered |
+| `w:body/w:p[541]/w:r[2]` | ...Bhatt et al | 121 | 119 | renumbered |
+| `w:body/w:p[547]/w:r[2]` | ...Dunican et al | 122 | 120 | renumbered |
+| `w:body/w:p[548]/w:r[2]` | ...Götschke et al | 123 | 121 | renumbered |
+| `w:body/w:p[554]/w:r[2]` | ...Roos et al | 124 | 122 | renumbered |
+| `w:body/w:p[555]/w:r[2]` | ...McIntosh et al | 125 | 123 | renumbered |
+| `w:body/w:p[556]/w:r[2]` | ...Hahn et al | 126 | 124 | renumbered |
+| `w:body/w:p[557]/w:r[2]` | ...Pippard et al | 127 | 125 | renumbered |
+| `w:body/w:p[563]/w:r[2]` | ...Pippard et al | 127 | 125 | renumbered |
+| `w:body/w:p[564]/w:r[2]` | ...Voskrebenzev et al | 128 | 126 | renumbered |
+| `w:body/w:p[571]/w:r[2]` | ...Voskrebenzev et al | 129 | 127 | renumbered |
+| `w:body/w:p[572]/w:r[2]` | ...Kairet et al | 130 | 128 | renumbered |
+| `w:body/w:p[573]/w:r[2]` | ...Friedlander et al | 131 | 129 | renumbered |
+| `w:body/w:p[574]/w:r[2]` | ...Benlala et al | 132 | 130 | renumbered |
+| `w:body/w:p[580]/w:r[2]` | ...Vogel-Claussen et al | 133 | 131 | renumbered |
+| `w:body/w:p[581]/w:r[2]` | ...Benlala et al | 134 | 132 | renumbered |
+
+### Reference List Modifications
+
+| Action | Ref # | New # | Reference Text |
+|--------|-------|-------|----------------|
+| keep | 1 | 1 | George L, Brightling CE. Eosinophilic airway inflammation: r... |
+| keep | 2 | 2 | Jesenak M, Diamant Z, Simon D, Tufvesson E, Seys SF, Mukherj... |
+| keep | 3 | 3 | Wechsler ME, Munitz A, Ackerman SJ, Drake MG, Jackson DJ, Wa... |
+| keep | 4 | 4 | Bernheim A, McLoud T. A review of clinical and imaging findi... |
+| keep | 5 | 5 | Allen JN, Davis WB. Eosinophilic lung diseases. Am J Respir ... |
+| keep | 6 | 6 | Bain GA, Flower CDR. Pulmonary eosinophilia. Eur J Radiol 19... |
+| keep | 7 | 7 | Cottin V. Eosinophilic lung diseases. Immunol Allergy Clin N... |
+| keep | 8 | 8 | Ou F-S, Michiels S, Shyr Y, Adjei AA, Oberg AL. Biomarker di... |
+| keep | 9 | 9 | De Giacomi F, Decker PA, Vassallo R, Ryu JH. Acute eosinophi... |
+| keep | 10 | 10 | Watz H, Tetzlaff K, Wouters EFM, Kirsten A, Magnussen H, Rod... |
+| keep | 11 | 11 | Pavord ID, Korn S, Howarth P, Bleecker ER, Buhl R, Keeneet O... |
+| keep | 12 | 12 | Grayson PC, Monach PA, Pagnoux C, Cuthbertson D, Carette S, ... |
+| keep | 13 | 13 | De Giacomi F, Vassallo R, Yi FD, Ryu JH. Acute eosinophilic ... |
+| keep | 14 | 14 | Marchand E, Reynaud-Gaubert M, Lauque D, Durieu J, Tonnel A-... |
+| keep | 15 | 15 | Allen JN, Davis WB, Pacht ER. Diagnostic significance of inc... |
+| keep | 16 | 16 | Bousquet J, Chanez P, Lacoste JY, Barnéon G, Ghavanian N, En... |
+| keep | 17 | 17 | Global initiative for asthma. Global strategy for asthma man... |
+| keep | 18 | 18 | Pizzichini E, Pizzichini M, Efthimiadis A, Hargreave F, Dolo... |
+| keep | 19 | 19 | Green RH, Brightling CE, McKenna S, Hargadon B, Parker D, Br... |
+| keep | 20 | 20 | Siva R, Green RH, Brightling CE, Shelley M, Hargadon B, McKe... |
+| keep | 21 | 21 | Leigh R, Pizzichini MMM, Morris MM, Maltais F, Hargreave FE,... |
+| keep | 22 | 22 | Nair P, Pizzichini MMM, Kjarsgaard M, Inman MD, Efthimiadis ... |
+| keep | 23 | 23 | Dweik RA, Boggs PB, Erzurum SC, Irvin CG, Leigh MW, Lundberg... |
+| keep | 24 | 24 | Louis R, Satia I, Ojanguren I, Schleich F, Bonini M, Tonia T... |
+| keep | 25 | 25 | Zitt M. Clinical applications of exhaled nitric oxide for th... |
+| keep | 26 | 26 | Meulmeester FL, Mailhot-Larouche S, Celis-Preciado C, Lemair... |
+| keep | 27 | 27 | Meyer K. Bronchoalveolar lavage as a diagnostic tool. Semin ... |
+| keep | 28 | 28 | Krueger JJ, Sayre VA, Karetzky MS. Bronchoalveolar lavage-in... |
+| keep | 29 | 29 | Vachani A, Zhou M, Ghosh S, Zhang S, Szapary P, Gaurav D, et... |
+| keep | 30 | 30 | Sugimoto H, Fukuda Y, Yamada Y, Ito H, Tanaka T, Yoshida T, ... |
+| keep | 31 | 31 | Lommatzsch M, Nair P, Virchow JC. Normal blood eosinophil co... |
+| keep | 32 | 32 | Pascoe S, Barnes N, Brusselle G, Compton C, Criner GJ, Drans... |
+| keep | 33 | 33 | Kostikas K, Brindicci C, Patalano F. Blood eosinophils as bi... |
+| keep | 34 | 34 | Durrington HJ, Gioan-Tavernier GO, Maidstone RJ, Krakowiak K... |
+| keep | 35 | 35 | Prazma CM, Bel EH, Price RG, Bradford ES, Albers FC, Yancey ... |
+| keep | 36 | 36 | Koenderman L, Hassani M, Mukherjee M, Nair P. Monitoring eos... |
+| keep | 37 | 37 | Mukherjee M, Nair P. Blood or sputum eosinophils to guide as... |
+| keep | 38 | 38 | Schleich FN, Chevremont A, Paulus V, Henket M, Manise M, Sei... |
+| keep | 39 | 39 | Hastie AT, Moore WC, Li H, Rector BM, Ortega VE, Pascual RM,... |
+| keep | 40 | 40 | Morrow Brown H. Treatment of chronic asthma with prednisolon... |
+| keep | 41 | 41 | Belda J, Parameswaran K, Keith PK, Hargreave FE. Repeatabili... |
+| keep | 42 | 42 | Ronchi MC, Piragino C, Rosi E, Amendola M, Duranti R, Scano ... |
+| keep | 43 | 43 | Moritz P, Steidle LJM, Felisbino MB, Kleveston T, Pizzichini... |
+| keep | 44 | 44 | Moermans C, Schleich F, Gerday S, Bricmont N, Bonhiver R, Gr... |
+| keep | 45 | 45 | Jayaram L, Pizzichini MM, Cook RJ, Boulet LP, Lemière C, Piz... |
+| keep | 46 | 46 | Pignatti P, Spanevello A. Is it time for a simplified method... |
+| keep | 47 | 47 | Ragnoli B, Radaeli A, Pochetti P, Kette S, Morjaria J, Maler... |
+| keep | 48 | 48 | Akdis CA, Arkwright PD, Brüggen M-C, Busse W, Gadina M, Gutt... |
+| ~~DELETE~~ | ~~49~~ | → 23 | ~~Dweik RA, Boggs PB, Erzurum SC, Irvin CG, Leigh MW, Lundberg...~~ |
+| RENUMBER | 50 | 49 | Jeppegaard M, Veidal S, Sverrild A, Backer V, Porsbjerg C. V... |
+| RENUMBER | 51 | 50 | Heaney LG, Perez De Llano L, Al-Ahmad M, Backer V, Busby J, ... |
+| RENUMBER | 52 | 51 | National Heart, Lung, and Blood Institute. Focused updates t... |
+| RENUMBER | 53 | 52 | Gyawali B, Georas SN, Khurana S. Biologics in severe asthma:... |
+| RENUMBER | 54 | 53 | Porsbjerg C, Melén E, Lehtimäki L, Shaw D. Asthma. Lancet 20... |
+| RENUMBER | 55 | 54 | Jennette JC, Falk RJ, Bacon PA, Basu N, Cid MC, Ferrario F, ... |
+| RENUMBER | 56 | 55 | Cottin V, Bel E, Bottero P, Dalhoff K, Humbert M, Lazor R, e... |
+| RENUMBER | 57 | 56 | Chung MP, Yi CA, Lee HY, Han J, Lee KS. Imaging of pulmonary... |
+| RENUMBER | 58 | 57 | Lanham JG, Elkon KB, Pusey CD, Hughes GR. Systemic vasculiti... |
+| RENUMBER | 59 | 58 | Wechsler ME, Nair P, Terrier B, Walz B, Bourdin A, Jayne DRW... |
+| RENUMBER | 60 | 59 | Mukherjee M, Suray Tan N, Huang C, Kim B, Radford K, Venegas... |
+| RENUMBER | 61 | 60 | Agarwal R, Muthu V, Sehgal IS, Dhooria S, Prasad KT, Aggarwa... |
+| RENUMBER | 62 | 61 | Geller DE, Kaplowitz H, Light MJ, Colin AA. Allergic broncho... |
+| RENUMBER | 63 | 62 | Dykewicz MS, Rodrigues JM, Slavin RG. Allergic fungal rhinos... |
+| RENUMBER | 64 | 63 | Muthu V, Singh P, Choudhary H, Sehgal IS, Dhooria S, Prasad ... |
+| RENUMBER | 65 | 64 | Saxena P, Choudhary H, Muthu V, Sehgal IS, Dhooria S, Prasad... |
+| RENUMBER | 66 | 65 | Wark P. Pathogenesis of allergic bronchopulmonary aspergillo... |
+| RENUMBER | 67 | 66 | Chen X, Zhi H, Wang X, Zhou Z, Luo H, Li J, et al. Efficacy ... |
+| RENUMBER | 68 | 67 | Brightling CE. Chronic cough due to nonasthmatic eosinophili... |
+| RENUMBER | 69 | 68 | Sadeghi MH, Morice AH. The emerging role of the eosinophil a... |
+| RENUMBER | 70 | 69 | Brightling CE. Comparison of airway immunopathology of eosin... |
+| RENUMBER | 71 | 70 | Rytilä P, Metso T, Heikkinen K, Saarelainen P, Helenius IJ, ... |
+| RENUMBER | 72 | 71 | Couillard S, Larivée P, Courteau J, Vanasse A. Eosinophils i... |
+| RENUMBER | 73 | 72 | Siddiqui SH, Guasconi A, Vestbo J, Jones P, Agusti A, Paggia... |
+| RENUMBER | 74 | 73 | Pavord ID, Chanez P, Criner GJ, Kerstjens HAM, Korn S, Lugog... |
+| RENUMBER | 75 | 74 | Criner GJ, Celli BR, Brightling CE, Agusti A, Papi A, Singh ... |
+| RENUMBER | 76 | 75 | Sciurba FC, Criner GJ, Christenson SA, Martinez FJ, Papi A, ... |
+| RENUMBER | 77 | 76 | Bhatt SP, Rabe KF, Hanania NA, Vogelmeier CF, Cole J, Bafadh... |
+| RENUMBER | 78 | 77 | Weller P, Bubley G. The idiopathic hypereosinophilic syndrom... |
+| RENUMBER | 79 | 78 | Valent P, Klion AD, Roufosse F, Simon D, Metzgeroth G, Leife... |
+| RENUMBER | 80 | 79 | Crane MM, Chang CM, Kobayashi MG, Weller PF. Incidence of my... |
+| RENUMBER | 81 | 80 | Kovacs N, Benjamin K, Holland-Thomas N, Moshkovich O, Nelsen... |
+| RENUMBER | 82 | 81 | Dulohery MM, Patel RR, Schneider F, Ryu JH. Lung involvement... |
+| RENUMBER | 83 | 82 | Thomeer MJ, Costabe U, Rizzato G, Poletti V, M D. Comparison... |
+| RENUMBER | 84 | 83 | Jederlinic PJ, Sicilian L, Gaensler EA. Chronic eosinophilic... |
+| RENUMBER | 85 | 84 | Marchand E, Etienne-Mastroianni B, Chanez P, Lauque D, Lecle... |
+| RENUMBER | 86 | 85 | Matsuse H, Shimoda T, Fukushima C, Matsvo N, Sakai H, Takao ... |
+| RENUMBER | 87 | 86 | Salter B, Lacy P, Mukherjee M. Biologics in asthma: a molecu... |
+| RENUMBER | 88 | 87 | Bhalla A, Zhao N, Rivas D, Ho T, Perez De Llano L, Mukherjee... |
+| RENUMBER | 89 | 88 | Mukherjee M, Forero DF, Tran S, Boulay M-E, Bertrand M, Bhal... |
+| RENUMBER | 90 | 89 | Venegas Garrido C, Mukherjee M, Bhalla A, Nair P. Airway aut... |
+| RENUMBER | 91 | 90 | Pavord ID, Chapman KR, Bafadhel M, Sciurba FC, Bradford ES, ... |
+| RENUMBER | 92 | 91 | Shaw DE, Sousa AR, Fowler SJ, Fleming LJ, Roberts G, Corfiel... |
+| RENUMBER | 93 | 92 | McDowell PJ, Azim A, Busby J, Diver S, Yang F, Borg C, et al... |
+| RENUMBER | 94 | 93 | Bleecker ER, Fitzgerald JM, Chanez P, Papi A, Weinstein SF, ... |
+| RENUMBER | 95 | 94 | Patel Z, Suray Tan N, Huynh A, Radford K, Calma N, Harper L,... |
+| ~~DELETE~~ | ~~96~~ | → 46 | ~~Pignatti P, Spanevello A. Is it time for a simplified method...~~ |
+| RENUMBER | 97 | 95 | Pizzichini MM, Pizzichini E, Clelland L, Efthimiadis A, Maho... |
+| RENUMBER | 98 | 96 | Kjarsgaard M, Adatia A, Bhalla A, Lavigne N, Radford K, Huan... |
+| RENUMBER | 99 | 97 | Klein  DK, Silberbrandt A, Frøssing L, Hvidtfeldt M, von Bül... |
+| RENUMBER | 100 | 98 | Baines KJ, Simpson JL, Wood LG, Scott RJ, Fibbens NL, Powell... |
+| RENUMBER | 101 | 99 | Fricker M, Gibson PG, Powell H, Simpson JL, Yang IA, Upham J... |
+| RENUMBER | 102 | 100 | Ibrahim B, Basanta M, Cadden P, Singh D, Douce D, Woodcock A... |
+| RENUMBER | 103 | 101 | Peltrini R, Cordell RL, Wilde M, Abuhelal S, Quek E, Zounema... |
+| RENUMBER | 104 | 102 | Dragonieri S, Schot R, Mertens BJA, Le Cessie S, Gauw SA, Sp... |
+| RENUMBER | 105 | 103 | Fens N, Zwinderman AH, Van Der Schee MP, De Nijs SB, Dijkers... |
+| RENUMBER | 106 | 104 | Kelly MM, Keatings V, Leigh R, Peterson C, Shute J, Venge P,... |
+| RENUMBER | 107 | 105 | Kim LH-Y, Plaza K, Thomas SR, Draijer C, Radford K, Peters-G... |
+| RENUMBER | 108 | 106 | Mukherjee M, Huang C, Venegas-Garrido C, Zhang K, Bhalla A, ... |
+| RENUMBER | 109 | 107 | Hekking PP, Zhang K, Garrido CPV, Lopez‐Rodriguez R, Kjarsga... |
+| RENUMBER | 110 | 108 | Svenningsen S, Kjarsgaard M, Zhang K, Serajeddini H, Venegas... |
+| RENUMBER | 111 | 109 | Nair P, Ochkur SI, Protheroe C, Radford K, Efthimiadis A, Le... |
+| RENUMBER | 112 | 110 | Wolfe MG, Mukherjee M, Radford K, Brennan JD, Nair P. Rapid ... |
+| RENUMBER | 113 | 111 | Ali MM, Mukherjee M, Radford K, Patel Z, Capretta A, P Nair,... |
+| RENUMBER | 114 | 112 | Dor PJ, Ackerman SJ, Gleich GJ. Charcot-Leyden crystal prote... |
+| RENUMBER | 115 | 113 | Dvorak AM, Letourneau L, Login GR, Weller PF, Ackerman SJ. U... |
+| RENUMBER | 116 | 114 | Persson EK, Verstraete K, Heyndrickx I, Gevaert E, Aegerter ... |
+| RENUMBER | 117 | 115 | Nyenhuis SM, Alumkal P, Du J, Maybruck BT, Vinicky M, Ackerm... |
+| RENUMBER | 118 | 116 | Hastie ST, Moore WC, Meyers DA, Vestal PL, Li H, Peters SP, ... |
+| RENUMBER | 119 | 117 | Lin K, Wang T, Tang Q, Chen T, Lin M, Jin J, et al. IL18R1-R... |
+| RENUMBER | 120 | 118 | Diaz AA, Young TP, Maselli DJ, Martinez CH, Gill R, Nardelli... |
+| RENUMBER | 121 | 119 | Bhatt SP, Nakhmani A, Sthanam V, Kizhakke Puliyakote A, Rein... |
+| RENUMBER | 122 | 120 | Dunican EM, Elicker BM, Gierada DS, Nagle SK, Schiebler ML, ... |
+| RENUMBER | 123 | 121 | Götschke J, Walter J, Leuschner G, Gerckens M, Götschke M, M... |
+| RENUMBER | 124 | 122 | Roos JE, McAdams HP, Kaushik SS, Driehuys B. Hyperpolarized ... |
+| RENUMBER | 125 | 123 | McIntosh MJ, Biancaniello A, Kooner HK, Bhalla A, Serajeddin... |
+| RENUMBER | 126 | 124 | Hahn AD, Carey KJ, Barton GP, Torres LA, Kammerman J, Cadman... |
+| RENUMBER | 127 | 125 | Pippard BJ, Neal MA, Holland CW, Maunder AM, Forrest I, Laws... |
+| RENUMBER | 128 | 126 | Voskrebenzev A, et al. Magn Reson Med 2018;79:1092-105. |
+| RENUMBER | 129 | 127 | Voskrebenzev A, Gutberlet M, Klimeš F, Kaireit TF, Schönfeld... |
+| RENUMBER | 130 | 128 | Kaireit TF, Kern A, Voskrebenzev A, Pöhler GH, Klimes F, Beh... |
+| RENUMBER | 131 | 129 | Friedlander Y, Munidasa S, Thakar A, Ragunayakam N, Venegas ... |
+| RENUMBER | 132 | 130 | Benlala I, Klaar R, Gaass T, Macey J, Bui S, Denis De Sennev... |
+| RENUMBER | 133 | 131 | Vogel-Claussen J, Renne J, Hinrichs J, Schönfeld C, Gutberle... |
+| RENUMBER | 134 | 132 | Benlala I, Dournes G, Girodet P-O, Laurent F, Ben Hassen W, ... |
+| RENUMBER | 135 | 133 | Barber C, Lau L, Ward JA, Daniels T, Watson A, Staples KJ, e... |
+| RENUMBER | 136 | 134 | Grebski E, Peterson C, Medici TC. Effect of physical and che... |
+| RENUMBER | 137 | 135 | Erin EM, Barnes PJ, Hansel TT. Optimizing sputum methodology... |
+| ~~DELETE~~ | ~~138~~ | → 94 | ~~Patel Z, Suray Tan N, Huynh A, Radford K, Calma N, Harper L,...~~ |
+| RENUMBER | 139 | 136 | Persson CG, Erjefalt JS. "Ultimate activation" of eosinophil... |
+| ~~DELETE~~ | ~~140~~ | → 95 | ~~Pizzichini MM, Pizzichini E, Clelland L, Efthimiadis A, Maho...~~ |
+| ~~DELETE~~ | ~~141~~ | → 96 | ~~Kjarsgaard M, Adatia A, Bhalla A, Lavigne N, Radford K, Huan...~~ |
+| ~~DELETE~~ | ~~142~~ | → 109 | ~~Nair P, Ochkur SI, Protheroe C, Radford K, Efthimiadis A, Le...~~ |
+| RENUMBER | 143 | 137 | Tang M, Charbit AR, Johansson MW, Jarjour NN, Denlinger LC, ... |
+| ~~DELETE~~ | ~~144~~ | → 110 | ~~Wolfe MG, Mukherjee M, Radford K, Brennan JD, Nair P. Rapid ...~~ |
+| RENUMBER | 145 | 138 | Tischendorf FW, Brattig NW, Lintzel M, Büttner DW, Burchard ... |
+| RENUMBER | 146 | 139 | Makiya MA, Khoury P, Kuang FL, Mata AD, Mahmood S, Bowman A,... |
+| RENUMBER | 147 | 140 | Mogensen I, Alving K, Dahlen SE, James A, Forsberg B, Ono J,... |
+| RENUMBER | 148 | 141 | Djukanović R, Brinkman P, Kolmert J, Gomez C, Schofield J, B... |
+| RENUMBER | 149 | 142 | Schleich FN, Zanella D, Stefanuto P-H, Bessonov K, Smolinska... |
+| RENUMBER | 150 | 143 | Bos LD, Sterk PJ, Fowler SJ. Breathomics in the setting of a... |
+| RENUMBER | 151 | 144 | Schleich FN, Dallinga JW, Henket M, Wouters EFM, Louis R, Va... |
+| ~~DELETE~~ | ~~152~~ | → 100 | ~~Ibrahim B, Basanta M, Cadden P, Singh D, Douce D, Woodcock A...~~ |
+| ~~DELETE~~ | ~~153~~ | → 101 | ~~Peltrini R, Cordell RL, Wilde M, Abuhelal S, Quek E, Zounema...~~ |
+| ~~DELETE~~ | ~~154~~ | → 102 | ~~Dragonieri S, Schot R, Mertens BJA, Le Cessie S, Gauw SA, Sp...~~ |
+| ~~DELETE~~ | ~~155~~ | → 103 | ~~Fens N, Zwinderman AH, Van Der Schee MP, De Nijs SB, Dijkers...~~ |
+| RENUMBER | 156 | 145 | Montuschi P, Santonico M, Mondino C, Pennazza G, Mantini G, ... |
+| RENUMBER | 157 | 146 | Brinkman P, Wagener AH, Hekking P-P, Bansal AT, Maitland-Van... |
+| RENUMBER | 158 | 147 | Plaza V, Crespo A, Giner J, Merino JL, Ramos-Barbón D, Mateu... |
+| ~~DELETE~~ | ~~159~~ | → 106 | ~~Mukherjee M, Huang C, Venegas-Garrido C, Zhang K, Bhalla A, ...~~ |
+| RENUMBER | 160 | 148 | Sunata K, Miyata J, Kawashima Y, Konno R, Ishikawa M, Hasega... |
+| RENUMBER | 161 | 149 | Wagener AH, De Nijs SB, Lutter R, Sousa AR, Weersink EJM, Be... |
+| RENUMBER | 162 | 150 | Rhee RL, Holweg CTJ, Wong K, Cuthbertson D, Carette S, Khali... |
+| RENUMBER | 163 | 151 | Scichilone N, Crimi C, Benfante A, Battaglia S, Iemmolo M, S... |
+| RENUMBER | 164 | 152 | Szefler S, Corren J, Silverberg JI, Okragly A, Sun Z, Natali... |
+| RENUMBER | 165 | 153 | Mukherjee M, Bulir DC, Radford K, Kjarsgaard M, Huang CM, Ja... |
+| RENUMBER | 166 | 154 | Mukherjee M, Lim HF, Thomas S, Miller D, Kjarsgaard M, Tan B... |
+| RENUMBER | 167 | 155 | Mukherjee M, Thomas SR, Radford K, Dvorkin-Gheva A, Davydche... |
+| RENUMBER | 168 | 156 | Son K, Miyasaki K, Salter B, Loukov D, Chon J, Zhao N, et al... |
+| RENUMBER | 169 | 157 | Salter B, Zhao N, Son K, Tan NS, Dvorkin-Gheva A, Radford K,... |
+| RENUMBER | 170 | 158 | Nolasco S, Kjarsgaard M, Lauks S, Treleaven O, Ho T, Huang C... |
+| ~~DELETE~~ | ~~171~~ | → 98 | ~~Baines KJ, Simpson JL, Wood LG, Scott RJ, Fibbens NL, Powell...~~ |
+| ~~DELETE~~ | ~~172~~ | → 99 | ~~Fricker M, Gibson PG, Powell H, Simpson JL, Yang IA, Upham J...~~ |
+| RENUMBER | 173 | 159 | Ditz B, Sarma A, Kerstjens HAM, Liesker JJW, Bathoorn E, Von... |
+| RENUMBER | 174 | 160 | Lefaudeux D, De Meulder B, Loza MJ, Peffer N, Rowe A, Bariba... |
+| RENUMBER | 175 | 161 | Moaddel R, Ubaida‐Mohien C, Tanaka T, Lyashkov A, Basisty N,... |
+| ~~DELETE~~ | ~~176~~ | → 117 | ~~Lin K, Wang T, Tang Q, Chen T, Lin M, Jin J, et al. IL18R1-R...~~ |
+| RENUMBER | 177 | 162 | Den Ouden F, Cseresznye A, Engelen L, Maris E, De Paepe E, P... |
+| RENUMBER | 178 | 163 | Loureiro CC, Oliveira AS, Santos M, Rudnitskaya A, Todo‐Bom ... |
+| RENUMBER | 179 | 164 | Krings JG, Wenzel SE, Castro M. The emerging role of quantit... |
+| RENUMBER | 180 | 165 | Walker C, Gupta S, Hartley R, Brightling CE. Computed tomogr... |
+| ~~DELETE~~ | ~~181~~ | → 118 | ~~Diaz AA, Young TP, Maselli DJ, Martinez CH, Gill R, Nardelli...~~ |
+| RENUMBER | 182 | 166 | Matsushita S, Yamashiro T, Matsuoka S, Yagihashi K, Nakajima... |
+| ~~DELETE~~ | ~~183~~ | → 122 | ~~Roos JE, McAdams HP, Kaushik SS, Driehuys B. Hyperpolarized ...~~ |
+| ~~DELETE~~ | ~~184~~ | → 120 | ~~Dunican EM, Elicker BM, Gierada DS, Nagle SK, Schiebler ML, ...~~ |
+| RENUMBER | 185 | 167 | Tang M, Elicker BM, Henry T, Gierada DS, Schiebler ML, Huang... |
+| RENUMBER | 186 | 168 | Tran C, Singh GV, Haider E, Boylan C, Venegas C, Riaz S, et ... |
+| RENUMBER | 187 | 169 | Liegeois MA, Hsieh A, Al-Fouadi M, Charbit AR, Yang CX, Hack... |
+| RENUMBER | 188 | 170 | Venegas Garrido C, Mukherjee M, Svenningsen S, Nair P. Eosin... |
+| RENUMBER | 189 | 171 | Kern AL, Vogel-Claussen J. Hyperpolarized gas MRI in pulmono... |
+| ~~DELETE~~ | ~~190~~ | → 123 | ~~McIntosh MJ, Biancaniello A, Kooner HK, Bhalla A, Serajeddin...~~ |
+| RENUMBER | 191 | 172 | Mussell GT, Marshall H, Smith LJ, Biancardi AM, Hughes PJC, ... |
+| ~~DELETE~~ | ~~192~~ | → 124 | ~~Hahn AD, Carey KJ, Barton GP, Torres LA, Kammerman J, Cadman...~~ |
+| RENUMBER | 193 | 173 | Qing K, Altes TA, Mugler JP, Tustison NJ, Mata, Ruppert K, e... |
+| RENUMBER | 194 | 174 | Halaweish AF, Moon RE, Foster WM, Soher BJ, McAdams HP, Macf... |
+| ~~DELETE~~ | ~~195~~ | → 125 | ~~Pippard BJ, Neal MA, Holland CW, Maunder AM, Forrest I, Laws...~~ |
+| ~~DELETE~~ | ~~196~~ | → 127 | ~~Voskrebenzev A, Gutberlet M, Klimeš F, Kaireit TF, Schönfeld...~~ |
+| ~~DELETE~~ | ~~197~~ | → 128 | ~~Kaireit TF, Kern A, Voskrebenzev A, Pöhler GH, Klimes F, Beh...~~ |
+| ~~DELETE~~ | ~~198~~ | → 129 | ~~Friedlander Y, Munidasa S, Thakar A, Ragunayakam N, Venegas ...~~ |
+| RENUMBER | 199 | 175 | Foo CT, Langton D, Donovan GM, Thompson BR, Noble PB, Thien ... |
+| ~~DELETE~~ | ~~200~~ | → 131 | ~~Vogel-Claussen J, Renne J, Hinrichs J, Schönfeld C, Gutberle...~~ |
+| ~~DELETE~~ | ~~201~~ | → 132 | ~~Benlala I, Dournes G, Girodet P-O, Laurent F, Ben Hassen W, ...~~ |
