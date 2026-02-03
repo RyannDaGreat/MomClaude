@@ -1,4 +1,72 @@
-# Citation Extraction by Paragraph
+# Section 1: Citation Extraction by Table
+
+## Table I
+
+- 1. Citation 9
+- 2. Citation 10
+- 3. Citation 11
+- 4. Citation 12
+- 5. Citation 13
+- 6. Citation 14
+- 7. Citation 15
+- 8. Citation 16
+- 9. Citation 17
+- 10. Citation 18
+- 11. Citation 19
+- 12. Citation 20
+- 13. Citation 21
+- 14. Citation 22
+- 15. Citation 23
+- 16. Citation 24
+- 17. Citation 25
+- 18. Citation 26
+
+## Table II
+
+- 1. Citation 95
+- 2. Citation 96
+- 3. Citation 97
+- 4. Citation 98
+- 5. Citation 99
+- 6. Citation 100
+- 7. Citation 101
+- 8. Citation 102
+- 9. Citation 103
+- 10. Citation 104
+- 11. Citation 105
+- 12. Citation 106
+- 13. Citation 107
+- 14. Citation 108
+- 15. Citation 109
+- 16. Citation 110
+- 17. Citation 111
+- 18. Citation 112
+- 19. Citation 113
+- 20. Citation 114
+- 21. Citation 115
+- 22. Citation 116
+- 23. Citation 117
+- 24. Citation 118
+- 25. Citation 119
+- 26. Citation 120
+- 27. Citation 121
+- 28. Citation 122
+- 29. Citation 123
+- 30. Citation 129
+- 31. Citation 3
+- 32. Citation 124
+- 33. Citation 125
+- 34. Citation 126
+- 35. Citation 127
+- 36. Citation 19
+- 37. Citation 128
+- 38. Citation 130
+- 39. Citation 131
+- 40. Citation 132
+- 41. Citation 133
+- 42. Citation 134
+
+# Section 2: Citation Extraction by Paragraph
 
 ## 1. Eosinophils are granulocytic...
 
