@@ -1301,113 +1301,236 @@ def generate_markdown(
 def create_modified_document(
     docx_path: str,
     output_path: str,
-    locations: list,
     dup_map: dict,
     dense_map: dict,
-    references: dict,
-) -> int:
+) -> tuple:
     """
-    Not a pure function. Create a modified Word document with updated citations.
+    Not a pure function. Create a modified Word document with visual diff style.
 
-    Reads the original .docx, applies citation transformations, and writes
-    a new .docx file. Returns the number of modifications made.
+    First accepts all track changes in the original document, then applies
+    citation transformations showing changes as:
+    - Old numbers: red superscript with strikethrough
+    - New numbers: green bold superscript
+
+    Modifies:
+    1. Citations in paragraphs
+    2. Citations in tables
+    3. Reference list entries (strikethrough duplicates, renumber kept)
+
+    Returns tuple of (paragraph_mods, table_mods, ref_mods).
     """
-    import shutil
     import tempfile
+    from lxml import etree
+    from docx import Document
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    from docx.shared import RGBColor
 
-    # Copy original to temp location
+    W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+    W = '{' + W_NS + '}'
+
+    # Step 1: Accept all track changes
     with tempfile.TemporaryDirectory() as temp_dir:
-        temp_docx = Path(temp_dir) / 'temp.docx'
-        shutil.copy(docx_path, temp_docx)
-
-        # Extract the docx (it's a zip file)
         extract_dir = Path(temp_dir) / 'extracted'
-        with zipfile.ZipFile(temp_docx, 'r') as z:
+        clean_path = Path(temp_dir) / 'clean.docx'
+
+        with zipfile.ZipFile(docx_path, 'r') as z:
             z.extractall(extract_dir)
 
-        # Read and modify document.xml
         doc_xml_path = extract_dir / 'word' / 'document.xml'
-        with open(doc_xml_path, 'r', encoding='utf-8') as f:
-            xml_content = f.read()
+        tree = etree.parse(str(doc_xml_path))
+        root = tree.getroot()
 
-        root = ET.fromstring(xml_content)
+        # Remove deletions
+        for del_elem in root.findall('.//' + W + 'del'):
+            parent = del_elem.getparent()
+            if parent is not None:
+                parent.remove(del_elem)
 
-        # Track modifications
-        mod_count = 0
+        # Unwrap insertions
+        for ins_elem in root.findall('.//' + W + 'ins'):
+            parent = ins_elem.getparent()
+            if parent is not None:
+                idx = list(parent).index(ins_elem)
+                for child in list(ins_elem):
+                    ins_elem.remove(child)
+                    parent.insert(idx, child)
+                    idx += 1
+                parent.remove(ins_elem)
 
-        # Process each citation location
-        for loc in locations:
-            p_idx = loc['paragraph_index']
-            r_start = loc['run_index']
-            r_end = loc['end_run_index']
-            orig_text = loc['original_text']
+        # Remove rPrChange
+        for rpr in root.findall('.//' + W + 'rPrChange'):
+            parent = rpr.getparent()
+            if parent is not None:
+                parent.remove(rpr)
 
-            # Parse original numbers
-            if '-' in orig_text:
-                match = CITATION_RANGE.match(orig_text)
-                if match:
-                    start, end = int(match.group(1)), int(match.group(2))
-                    orig_nums = list(range(start, end + 1))
-                else:
-                    orig_nums = [int(orig_text)]
-            else:
-                orig_nums = [int(n.strip()) for n in orig_text.split(',') if n.strip().isdigit()]
+        tree.write(str(doc_xml_path), xml_declaration=True, encoding='UTF-8', standalone=True)
 
-            # Apply mappings
-            new_nums = apply_citation_mappings(orig_nums, dup_map, dense_map)
-
-            # Format new text (just the number part)
-            if len(new_nums) == 0:
-                new_text = ""
-            elif len(new_nums) == 1:
-                new_text = str(new_nums[0])
-            else:
-                new_text = format_numbers_to_citation(new_nums).replace('Citations ', '').replace('Citation ', '')
-
-            # Skip if unchanged
-            if new_text == orig_text:
-                continue
-
-            # Find and modify the run(s)
-            paragraphs = root.findall('.//w:p', NAMESPACES)
-            if p_idx < len(paragraphs):
-                p = paragraphs[p_idx]
-                runs = p.findall('.//w:r', NAMESPACES)
-
-                # Modify the first run of the citation
-                if r_start < len(runs):
-                    r = runs[r_start]
-                    text_elem = r.find('.//w:t', NAMESPACES)
-                    if text_elem is not None:
-                        text_elem.text = new_text
-                        mod_count += 1
-
-                    # Clear subsequent runs in this citation group
-                    for r_idx in range(r_start + 1, min(r_end + 1, len(runs))):
-                        r = runs[r_idx]
-                        text_elem = r.find('.//w:t', NAMESPACES)
-                        if text_elem is not None:
-                            text_elem.text = ""
-
-        # Write modified XML back
-        # Register namespaces to avoid ns0: prefixes
-        for prefix, uri in NAMESPACES.items():
-            ET.register_namespace(prefix, uri)
-        # Also register other common Office namespaces
-        ET.register_namespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships')
-        ET.register_namespace('wp', 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing')
-
-        tree = ET.ElementTree(root)
-        tree.write(doc_xml_path, encoding='UTF-8', xml_declaration=True)
-
-        # Repack the docx
-        with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as z:
+        with zipfile.ZipFile(clean_path, 'w', zipfile.ZIP_DEFLATED) as z:
             for file_path in extract_dir.rglob('*'):
                 if file_path.is_file():
                     arcname = file_path.relative_to(extract_dir)
                     z.write(file_path, arcname)
 
-    return mod_count
+        # Step 2: Apply visual diff modifications using python-docx
+        doc = Document(str(clean_path))
+
+        def parse_citation_text(text):
+            """Parse citation text like '49' or '1,' or '19-22,42' into numbers."""
+            nums = []
+            text = text.replace(',', ' ').replace('-', ' - ')
+            parts = text.split()
+            i = 0
+            while i < len(parts):
+                if parts[i].isdigit():
+                    if i + 2 < len(parts) and parts[i + 1] == '-' and parts[i + 2].isdigit():
+                        start, end = int(parts[i]), int(parts[i + 2])
+                        nums.extend(range(start, end + 1))
+                        i += 3
+                    else:
+                        nums.append(int(parts[i]))
+                        i += 1
+                else:
+                    i += 1
+            return nums
+
+        def format_nums(nums):
+            """Format numbers to citation text."""
+            if not nums:
+                return ""
+            if len(nums) == 1:
+                return str(nums[0])
+            result = format_numbers_to_citation(nums)
+            return result.replace('Citations ', '').replace('Citation ', '')
+
+        def create_visual_diff_runs(run, text, new_text, is_superscript=True):
+            """Replace a run with red strikethrough old + green bold new."""
+            run_element = run._element
+            parent = run_element.getparent()
+            idx = list(parent).index(run_element)
+
+            # RED strikethrough for old
+            old_run = OxmlElement('w:r')
+            old_rpr = OxmlElement('w:rPr')
+            if is_superscript:
+                vert = OxmlElement('w:vertAlign')
+                vert.set(qn('w:val'), 'superscript')
+                old_rpr.append(vert)
+            color = OxmlElement('w:color')
+            color.set(qn('w:val'), 'FF0000')
+            old_rpr.append(color)
+            strike = OxmlElement('w:strike')
+            old_rpr.append(strike)
+            old_run.append(old_rpr)
+            old_t = OxmlElement('w:t')
+            old_t.text = text
+            old_run.append(old_t)
+
+            # GREEN bold for new
+            new_run = OxmlElement('w:r')
+            new_rpr = OxmlElement('w:rPr')
+            if is_superscript:
+                vert2 = OxmlElement('w:vertAlign')
+                vert2.set(qn('w:val'), 'superscript')
+                new_rpr.append(vert2)
+            color2 = OxmlElement('w:color')
+            color2.set(qn('w:val'), '008000')
+            new_rpr.append(color2)
+            bold = OxmlElement('w:b')
+            new_rpr.append(bold)
+            new_run.append(new_rpr)
+            new_t = OxmlElement('w:t')
+            new_t.text = new_text
+            new_run.append(new_t)
+
+            parent.insert(idx, old_run)
+            parent.insert(idx + 1, new_run)
+            parent.remove(run_element)
+
+        def process_superscript_runs(runs_source):
+            """Process superscript citation runs from a paragraph or cell."""
+            runs_info = []
+            for i, run in enumerate(runs_source):
+                if run.font.superscript and run.text:
+                    text = run.text.strip()
+                    if text and text[0].isdigit():
+                        runs_info.append((i, run, text))
+
+            count = 0
+            for i, run, text in reversed(runs_info):
+                trailing = ""
+                clean_text = text
+                if text.endswith(','):
+                    trailing = ','
+                    clean_text = text[:-1]
+                elif text.endswith(', '):
+                    trailing = ', '
+                    clean_text = text[:-2]
+
+                orig_nums = parse_citation_text(clean_text)
+                if not orig_nums:
+                    continue
+
+                new_nums = apply_citation_mappings(orig_nums, dup_map, dense_map)
+
+                if orig_nums == new_nums:
+                    continue
+
+                new_text = format_nums(new_nums) + trailing
+                create_visual_diff_runs(run, text, new_text, is_superscript=True)
+                count += 1
+
+            return count
+
+        # Process paragraphs
+        para_mods = 0
+        for para in doc.paragraphs:
+            para_mods += process_superscript_runs(para.runs)
+
+        # Process tables
+        table_mods = 0
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for para in cell.paragraphs:
+                        table_mods += process_superscript_runs(para.runs)
+
+        # Process reference list
+        ref_mods = 0
+        ref_pattern = re.compile(r'^(\d+)\.\s+')
+
+        for para in doc.paragraphs:
+            text = para.text.strip()
+            match = ref_pattern.match(text)
+            if not match:
+                continue
+
+            ref_num = int(match.group(1))
+
+            # Check if this reference needs modification
+            if ref_num in dup_map:
+                # This is a duplicate - strikethrough entire paragraph
+                for run in para.runs:
+                    # Add red color and strikethrough
+                    run.font.color.rgb = RGBColor(0xFF, 0x00, 0x00)
+                    run.font.strike = True
+                ref_mods += 1
+            elif ref_num in dense_map and dense_map[ref_num] != ref_num:
+                # This reference needs renumbering
+                new_num = dense_map[ref_num]
+                # Find the first run with the number and modify it
+                for run in para.runs:
+                    if run.text and run.text.strip().startswith(str(ref_num)):
+                        old_text = run.text
+                        new_text = old_text.replace(f"{ref_num}.", f"{new_num}.", 1)
+                        # Create visual diff for just the number
+                        create_visual_diff_runs(run, str(ref_num), str(new_num), is_superscript=False)
+                        ref_mods += 1
+                        break
+
+        doc.save(output_path)
+
+    return para_mods, table_mods, ref_mods
 
 
 def main():
@@ -1440,17 +1563,18 @@ def main():
     print(f"Duplicate references: {dup_count}")
     print(f"Output written to: {output_path}")
 
-    # Create modified document
+    # Create modified document with visual diff (red strikethrough old, green bold new)
     max_ref = max(references.keys())
     dense_map = build_densification_map(duplicates, max_ref)
-    locations = extract_citation_locations(xml_str, author_names)
 
     modified_docx_path = docx_path.replace('.docx', '_modified.docx')
-    actual_mods = create_modified_document(
-        docx_path, modified_docx_path, locations, duplicates, dense_map, references
+    para_mods, table_mods, ref_mods = create_modified_document(
+        docx_path, modified_docx_path, duplicates, dense_map
     )
     print(f"Modified document created: {modified_docx_path}")
-    print(f"Actual modifications made: {actual_mods}")
+    print(f"  Paragraph citations modified: {para_mods}")
+    print(f"  Table citations modified: {table_mods}")
+    print(f"  References modified: {ref_mods}")
 
 
 if __name__ == '__main__':
