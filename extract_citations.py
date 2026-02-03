@@ -87,19 +87,15 @@ NAMESPACES = {
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 }
 
-ROMAN_PATTERN = re.compile(r'\b[Tt]ables?\s+([IVXLCDMivxlcdm]+)\b')
+# === REGEX PATTERNS ===
+ROMAN_PATTERN = re.compile(r'\b[Tt]ables?\s+([IVXLCDMivxlcdm]+)\b')  # Table references in text
+CITATION_SINGLE = re.compile(r'^(\d+)$')                             # Single citation number
+CITATION_RANGE = re.compile(r'^(\d+)-(\d+)$')                        # Citation range (e.g., 19-22)
+AUTHOR_PATTERN = re.compile(r'([A-Za-zÀ-ÿ\-\']+)\s+[A-Z]{1,3}(?:[,;.]|$)')  # Author names in refs
+REF_ENTRY_PATTERN = re.compile(r'^\d+\.\s+')                         # Reference entry (e.g., "1. ")
 
-# Citation patterns: single number or range
-CITATION_SINGLE = re.compile(r'^(\d+)$')
-CITATION_RANGE = re.compile(r'^(\d+)-(\d+)$')
-
+# === CONSTANTS ===
 ROMAN_TO_INT = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10}
-
-# Author name pattern: LastName followed by initials (1-3 uppercase letters) then comma/semicolon/period/end
-AUTHOR_PATTERN = re.compile(r'([A-Za-zÀ-ÿ\-\']+)\s+[A-Z]{1,3}(?:[,;.]|$)')
-
-# Reference entry pattern: starts with number + period
-REF_ENTRY_PATTERN = re.compile(r'^\d+\.\s+')
 
 
 def extract_author_names(doc_xml: str) -> set:
