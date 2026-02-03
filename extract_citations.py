@@ -366,17 +366,18 @@ def generate_duplicate_comparison_table(references: dict, duplicates: dict) -> s
     lines = ["| Status | # | Reference Text |", "|--------|---|----------------|"]
 
     for num, text in sorted_refs:
+        truncated = f"{text[:80]}..." if len(text) > 80 else text
         if num in duplicates:
             # This is a duplicate (will be deleted)
             orig = duplicates[num]
-            lines.append(f"| ~~DELETED~~ | ~~{num}~~ | ~~{text[:80]}{'...' if len(text) > 80 else ''}~~ (→ {orig}) |")
+            lines.append(f"| ~~DELETED~~ | ~~{num}~~ | ~~{truncated}~~ (→ {orig}) |")
         else:
             # Check if this is an original that has duplicates pointing to it
             has_dups = num in duplicates.values()
             if has_dups:
-                lines.append(f"| **KEPT** | **{num}** | **{text[:80]}{'...' if len(text) > 80 else ''}** |")
+                lines.append(f"| **KEPT** | **{num}** | **{truncated}** |")
             else:
-                lines.append(f"| - | {num} | {text[:80]}{'...' if len(text) > 80 else ''} |")
+                lines.append(f"| - | {num} | {truncated} |")
 
     return '\n'.join(lines)
 
@@ -991,12 +992,19 @@ def process_paragraphs(xml_str: str, author_names: set = None) -> list:
     return results
 
 
-def generate_markdown(table_citations: dict, paragraph_results: list, output_path: str) -> tuple:
+def generate_markdown(
+    table_citations: dict,
+    paragraph_results: list,
+    output_path: str,
+    references: dict = None,
+    duplicates: dict = None,
+) -> tuple:
     """
     Not a pure function. Writes to file.
 
-    Generate markdown output file with three sections.
-    Returns tuple of (int, int, int): (table_count, paragraph_count, conversion_count).
+    Generate markdown output file with sections for tables, paragraphs, conversion,
+    and optionally duplicate reference tables.
+    Returns tuple of (int, int, int, int): (table_count, paragraph_count, conversion_count, duplicate_count).
     """
     lines = []
 
@@ -1059,8 +1067,29 @@ def generate_markdown(table_citations: dict, paragraph_results: list, output_pat
 
     lines.append("")
 
+    # Section 4 & 5: Duplicate Reference Tables (if provided)
+    duplicate_count = 0
+    if references is not None and duplicates is not None:
+        duplicate_count = len(duplicates)
+
+        lines.append("# Section 4: Duplicate Reference Conversion\n")
+        lines.append(f"**Total references:** {len(references)}")
+        lines.append(f"**Duplicates found:** {duplicate_count}")
+        lines.append(f"**Unique references after dedup:** {len(references) - duplicate_count}")
+        lines.append("")
+        lines.append(generate_numerical_conversion_table(duplicates))
+        lines.append("")
+
+        lines.append("# Section 5: Duplicate Comparison (Sorted Alphabetically)\n")
+        lines.append("- **KEPT** = Original reference retained")
+        lines.append("- ~~DELETED~~ = Duplicate removed (shows which original it maps to)")
+        lines.append("- `-` = Unique reference (no duplicates)")
+        lines.append("")
+        lines.append(generate_duplicate_comparison_table(references, duplicates))
+        lines.append("")
+
     Path(output_path).write_text('\n'.join(lines))
-    return len(sorted_tables), len(paragraph_results), len(conversion)
+    return len(sorted_tables), len(paragraph_results), len(conversion), duplicate_count
 
 
 def main():
@@ -1076,10 +1105,19 @@ def main():
     table_citations = process_tables(xml_str, author_names)
     paragraph_results = process_paragraphs(xml_str, author_names)
 
-    table_count, para_count, conv_count = generate_markdown(table_citations, paragraph_results, str(output_path))
+    # Extract references and detect duplicates
+    references = extract_references(docx_path)
+    duplicates = detect_duplicate_references(references)
+    print(f"Found {len(references)} references, {len(duplicates)} duplicates")
+
+    table_count, para_count, conv_count, dup_count = generate_markdown(
+        table_citations, paragraph_results, str(output_path),
+        references=references, duplicates=duplicates
+    )
     print(f"Extracted {table_count} tables with citations")
     print(f"Extracted {para_count} paragraphs with citations")
     print(f"Citations needing renumbering: {conv_count}")
+    print(f"Duplicate references: {dup_count}")
     print(f"Output written to: {output_path}")
 
 
