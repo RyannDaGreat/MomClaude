@@ -297,7 +297,3 @@
 ## 33. Type 2-weighted proton...
 
 - 1. Citations 200, 201
-
-## 34. 197. Kaireit TF,...
-
-- 1. Citation 129

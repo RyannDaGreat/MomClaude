@@ -41,6 +41,15 @@ Section 2: Paragraph Citation Extraction Rules
 
 8. No Deduplication: If a citation appears multiple times, include it multiple
    times in order of appearance.
+
+=== CODE CONVENTIONS ===
+
+- Pure functions should be marked with "Pure function." at the start of their
+  docstring. Pure functions take simple built-in types (str, int, list, tuple,
+  dict) and return deterministic output with no side effects.
+
+- All pure functions must have at least 3 informative doctest examples in
+  >>> ... format so the function's behavior is clear without reading the code.
 """
 
 import zipfile
@@ -291,6 +300,24 @@ def extract_paragraph_with_citations(p):
     return full_text, citations
 
 
+def is_reference_entry(text):
+    """
+    Pure function. Check if text is a bibliography/reference list entry.
+
+    Reference entries typically start with a number followed by a period.
+
+    >>> is_reference_entry('197. Kaireit TF, Kern A...')
+    True
+    >>> is_reference_entry('1. First reference entry')
+    True
+    >>> is_reference_entry('Eosinophils are granulocytic cells...')
+    False
+    >>> is_reference_entry('The study by Smith et al.')
+    False
+    """
+    return bool(re.match(r'^\d+\.\s', text.strip()))
+
+
 def process_paragraphs(root):
     """Process paragraphs and extract citations."""
     results = []
@@ -302,6 +329,10 @@ def process_paragraphs(root):
             continue
 
         if not citations:
+            continue
+
+        # Skip reference list entries (e.g., "197. Kaireit TF...")
+        if is_reference_entry(text):
             continue
 
         words = text.split()
